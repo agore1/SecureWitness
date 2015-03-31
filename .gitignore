@@ -55,3 +55,9 @@ target/
 
 #Database
 *.sqlite3
+
+#Temporary files
+*~
+
+#Pycharm 
+*.idea
