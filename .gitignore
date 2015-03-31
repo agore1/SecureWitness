@@ -62,3 +62,9 @@ target/
 *.mp4
 *.doc
 *.docx
+
+#Temporary files
+*~
+
+#Pycharm 
+*.idea

@@ -8,4 +8,5 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
 	url(r'^upload/', include('upload.urls')),
+	url(r'^accounts/', include('registration.backends.simple.urls')),
 )

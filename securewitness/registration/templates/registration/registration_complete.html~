@@ -1,0 +1,4 @@
+<html>
+{% csrf_token %}
+<h1> Registration complete! </h1>
+</html>
