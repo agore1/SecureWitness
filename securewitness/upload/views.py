@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import RequestContext, loader
-from upload.models import Report, Report_file#, ReportForm
+from upload.models import Report, Report_file, Report_keyword#, ReportForm
 from django.utils import timezone
 #from reports import formModels
 from django import forms
@@ -25,6 +25,17 @@ def report(request):
 			r.long_desc = form.cleaned_data["long_des"];
 			r.location = form.cleaned_data["location"];
 			r.save();
+			
+			#Create tags
+			tags = form.cleaned_data["tags"].split(",");
+			for i in tags:
+				if len(i) <= 20:
+					k = Report_keyword();
+					k.keyword = i.lstrip();
+					k.report = r;
+					k.save();
+			
+			#Create file object
 			f = Report_file();
 			f.report = r;
 			f.file = form.cleaned_data["file"];
@@ -41,7 +52,7 @@ class ReportForm(forms.Form):
 	short_des = forms.CharField(label="Short description", max_length = 50);
 	long_des = forms.CharField(label="Long description", max_length = 500);
 	location = forms.CharField(label="Location (optional)", max_length = 50,required=False);
-	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100);
+	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
 	
 	file = forms.FileField(label="Report file");
 	
