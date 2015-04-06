@@ -6,9 +6,12 @@ Views which allow users to create and activate accounts.
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.contrib.auth import logout
 
 from registration import signals
-from registration.forms import RegistrationForm
+from registration.forms import RegistrationForm, loginForm
 
 
 class _RequestPassingFormView(FormView):
@@ -137,3 +140,28 @@ class ActivationView(TemplateView):
 
     def get_success_url(self, request, user):
         raise NotImplementedError
+
+def login(request):
+	if request.method == 'POST':
+		form = userForm(request.POST)
+		if form.is_valid():
+			user = authenticate(username=form.cleaned_data['username'],password=form.cleaned_data['password']);
+			if user is not None: 
+				return(HttpResponse("Logged in"));
+			else:
+				return HttpResponse("Username/Password combination invalid.");
+	else:
+		c = {'form':userForm()};
+		return render(request, 'login.html',c);
+	
+def logout_view(request):
+	logout(request);
+	if request.user.is_authenticated():
+		return HttpResponse("wat");
+	return redirect("/accounts/login/");
+	
+def profile(request):
+	if request.user.is_authenticated():
+		c = {'user_name':request.user.username};
+		return render(request, 'registration\profile.html',c);
+	return redirect("/accounts/login/");

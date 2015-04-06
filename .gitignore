@@ -53,8 +53,15 @@ docs/_build/
 # PyBuilder
 target/
 
-#Database
+#Databases
+*.db
 *.sqlite3
+
+#misc. files
+*.mp3
+*.mp4
+*.doc
+*.docx
 
 #Temporary files
 *~

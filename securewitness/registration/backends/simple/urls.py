@@ -21,7 +21,7 @@ from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.views.generic.base import TemplateView
-
+from registration import views
 from registration.backends.simple.views import RegistrationView
 
 
@@ -36,4 +36,6 @@ urlpatterns = patterns('',
                            TemplateView.as_view(template_name='registration/registration_complete.html'),
                            name='registration_complete'),
                        (r'', include('registration.auth_urls')),
+					   
+					   url(r'^profile',views.profile,name="user_profile")
                        )

@@ -1,0 +1,24 @@
+<head>
+<style>
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<div>
+	USER INFO HERE
+	<p>
+	User: {{ user_name|default:"Anonymous?! WHAT?!"}}
+	</p>
+	<br>
+	<a href="/upload/report">Upload a report</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+</div>
+</body>

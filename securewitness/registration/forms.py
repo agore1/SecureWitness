@@ -120,3 +120,9 @@ class RegistrationFormNoFreeEmail(RegistrationForm):
         if email_domain in self.bad_domains:
             raise forms.ValidationError(_("Registration using free email addresses is prohibited. Please supply a different email address."))
         return self.cleaned_data['email']
+
+		
+class loginForm():
+	username = forms.CharField(label="Username:", max_length=30);
+	password = forms.CharField(label="Password:");
+	

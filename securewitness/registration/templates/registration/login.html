@@ -1,0 +1,23 @@
+<head>
+<style>
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<form action="" method="post">
+	<label for="submit-form"><b>Login</b></label>
+	
+	{% csrf_token %}
+	{{form.as_p}}
+<div class="form">
+	<input type="submit" value="Submit">
+</div>
+</form>
+</body>

@@ -13,3 +13,4 @@ warnings.warn("include('registration.urls') is deprecated; use include('registra
               DeprecationWarning)
 
 from registration.backends.default.urls import *
+from registration import views
