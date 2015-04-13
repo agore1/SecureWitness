@@ -1,5 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
+
+import os
 # Create your models here.
 
 
@@ -14,6 +16,7 @@ class Report(models.Model):
 	short_desc = models.CharField(max_length = 50, default="None");
 	long_desc = models.CharField(max_length=500, default = "None");
 	location = models.CharField(max_length=50, default = "None");
+	private = models.BooleanField(default=False);
 	def __str__(self):
 		return "published on: "+str(self.pub_date);
 
@@ -23,7 +26,9 @@ class Report_file(models.Model):
 	report = models.ForeignKey(Report);
 	file = models.FileField(upload_to=file_path_maker);
 	def __str__(self):
-		return "File";
+		return self.filename();
+	def filename(self):
+		return os.path.basename(self.file.name);
 		
 class Report_keyword(models.Model):
 	report = models.ForeignKey(Report);

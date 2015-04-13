@@ -6,13 +6,37 @@ Views which allow users to create and activate accounts.
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth import logout
+from django.utils import timezone
 
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
+from upload.models import Report
 
+class ReportListView(ListView):
+	model = Report;
+	
+	slug = None;
+	
+	def get_object(self, queryset=None):
+		return queryset.get(slug=self.slug);
+	
+	def get_queryset(self):
+		user = self.kwargs.get('slug','');
+		
+		if(user != ''):
+			object_list = self.model.objects.filter(author=user);
+		else:
+			object_list = [];
+		return object_list;
+	
+	def get_context_data(self, **kwargs):
+		con = super(ReportListView, self).get_context_data(**kwargs);
+		con['user_name'] = self.kwargs.get('slug',None);
+		return con
 
 class _RequestPassingFormView(FormView):
     """
