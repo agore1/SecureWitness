@@ -26,9 +26,11 @@ class ReportListView(ListView):
 	
 	def get_queryset(self):
 		user = self.kwargs.get('slug','');
-		
 		if(user != ''):
-			object_list = self.model.objects.filter(author=user);
+			if(user != self.request.user.username):
+				object_list = self.model.objects.filter(author=user,private=False);
+			else:
+				object_list = self.model.objects.filter(author=user);
 		else:
 			object_list = [];
 		return object_list;

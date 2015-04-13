@@ -6,6 +6,10 @@ from django.utils import timezone
 #from reports import formModels
 from django import forms
 
+def search(request, slug):
+	
+
+	return HttpResponse(slug);
 
 # Create your views here.
 def report(request):

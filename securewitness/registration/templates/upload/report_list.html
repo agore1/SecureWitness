@@ -20,8 +20,6 @@
 
 <h1>{{ user_name|default:"Anonymous"}}'s reports</h1>
 
-<div>
-	
 	<ul>
 	{% for report in object_list %}
 		<li>
@@ -40,12 +38,14 @@
 			</div>
 		</li>
 	{% empty %}
-		<li>No reports uploaded.</li>
+		<li>No visible reports uploaded.</li>
 	{% endfor %}
 	</ul>
 	<br>
 	<a href="/upload/report">Upload a report</a>
 	<br>
 	<a href="/accounts/logout">Log out</a>
-</div>
+	
+	
+	{{ debug }}
 </body>
