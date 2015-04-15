@@ -9,6 +9,16 @@ import os
 def file_path_maker(instance, f_name):
 	return "/".join(['report_files',instance.report.author,f_name]);
 
+def delete_report(report):
+	for k in report.report_keyword_set.all():
+		k.delete();
+	for f in report.report_file_set.all():
+		file = f.file;
+		if(os.path.isfile(file.path)):
+			os.remove(file.path);
+		f.delete();
+	report.delete();
+	
 #Model for the main report, what is there to say
 class Report(models.Model):
 	pub_date = models.DateTimeField('date published');

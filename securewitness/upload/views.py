@@ -45,7 +45,7 @@ def report(request):
 			f.report = r;
 			f.file = form.cleaned_data["file"];
 			f.save();
-			return HttpResponse("file uploaded!");
+			return redirect("/accounts/"+request.user.username+"/reports");
 	#If it's not a post, build the form
 	else:
 		c = {'form':ReportForm()};
@@ -57,7 +57,7 @@ class ReportForm(forms.Form):
 	short_des = forms.CharField(label="Short description", max_length = 50);
 	long_des = forms.CharField(label="Long description", max_length = 500);
 	location = forms.CharField(label="Location (optional)", max_length = 50,required=False);
-	private = forms.BooleanField(label="Private");
+	private = forms.BooleanField(label="Private", required=False);
 	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
 	
 	file = forms.FileField(label="Report file");

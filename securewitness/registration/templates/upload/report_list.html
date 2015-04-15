@@ -20,9 +20,15 @@
 
 <h1>{{ user_name|default:"Anonymous"}}'s reports</h1>
 
+<form id="action" action="/accounts/{{ user_name }}/reports/" method="post">{% csrf_token %}
+	
+	
 	<ul>
 	{% for report in object_list %}
 		<li>
+			{% if editable %}
+			<input type="checkbox" name="check{{ report.id }}" value={{ report.id }}>
+			{% endif %}
 			{{ report.pub_date|date }} - {{ report.short_desc }}
 			<div class="report_desc">
 				{{ report.long_desc }}
@@ -41,6 +47,16 @@
 		<li>No visible reports uploaded.</li>
 	{% endfor %}
 	</ul>
+	{% if editable %}
+	<input type="submit" value="Action">
+	<select name="action_taken" form="action">
+		<option value="move">Move to...</option>
+		<option value="delete">Delete</option>
+	</select>
+	{% endif %}
+</form>
+
+
 	<br>
 	<a href="/upload/report">Upload a report</a>
 	<br>

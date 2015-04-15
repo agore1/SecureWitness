@@ -14,7 +14,11 @@ from django.utils import timezone
 
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
-from upload.models import Report
+from upload.models import Report, delete_report
+
+#def ReportEdit(request):
+#	return render(request, 'submit.html', {});
+	#return redirect("/accounts/"+request.user.username+"/reports");
 
 class ReportListView(ListView):
 	model = Report;
@@ -38,7 +42,21 @@ class ReportListView(ListView):
 	def get_context_data(self, **kwargs):
 		con = super(ReportListView, self).get_context_data(**kwargs);
 		con['user_name'] = self.kwargs.get('slug',None);
+		if self.request.method == "POST":
+			con["user_name"] = "delete";
+		con['editable'] = False;
+		if(con["user_name"] == self.request.user.username):
+			con['editable'] = True;
 		return con
+		
+	def post(self, request, *args, **kwargs):
+		if(request.POST["action_taken"] == "delete"):
+			for key in (list)(request.POST.keys()):
+				if key[0:5] == "check":
+					reportID = request.POST[key];
+					report = self.model.objects.filter(id=int(reportID))[0];
+					delete_report(report);
+		return HttpResponse(request.POST.items());
 
 class _RequestPassingFormView(FormView):
     """

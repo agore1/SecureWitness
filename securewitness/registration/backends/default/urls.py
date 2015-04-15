@@ -52,6 +52,5 @@ urlpatterns = patterns('',
 					   url(r'^profile',views.profile,name="user_profile"),
 					   url(r'^login',views.login,name="user_login"),
 					   url(r'^logout',views.logout_view,name="user_logout"),
-					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/reports$',views.ReportListView.as_view(),name="report_list"),
-					   
+					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/reports/$',views.ReportListView.as_view(),name="report_list"),
                        )
