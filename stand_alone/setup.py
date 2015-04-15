@@ -6,7 +6,7 @@ setup(
     py_modules=['main'],
     install_requires=[
         'Click',
-        'pycrypto'
+        'simple-crypt'
     ],
     entry_points='''
         [console_scripts]
