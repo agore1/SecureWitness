@@ -16,8 +16,8 @@ def login():
     click.echo('The username was: {0} and the password was: {1}'.format(username, password))
 
     s = requests.Session()
-    s.get('http://httpbin.org/cookies/set/sessioncookie/123456789')
-    r = s.get("http://httpbin.org/cookies")
+    s.get('http://127.0.0.1:8000/accounts/login/')
+    r = requests.get('http://127.0.0.1:8000/accounts/login/')
     click.echo(r.text)
     # response = urllib.request.urlopen('http://127.0.0.1:8000/standalone/')
     # html = response.read()
