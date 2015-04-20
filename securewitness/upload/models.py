@@ -19,6 +19,13 @@ def delete_report(report):
 		f.delete();
 	report.delete();
 	
+def delete_folder(folder):
+	for r in folder.report_set.all():
+		delete_report(r);
+	for f in folder.folder_set.all():
+		delete_folder(f);
+	folder.delete();
+	
 #Model for the main report, what is there to say
 class Report(models.Model):
 	pub_date = models.DateTimeField('date published');
@@ -27,9 +34,15 @@ class Report(models.Model):
 	long_desc = models.CharField(max_length=500, default = "None");
 	location = models.CharField(max_length=50, default = "None");
 	private = models.BooleanField(default=False);
+	in_folder = models.ForeignKey('Folder', default=-1);
 	def __str__(self):
 		return "published on: "+str(self.pub_date);
 
+class Folder(models.Model):
+	author = models.CharField(max_length=200,default="Anonymous");
+	name = models.CharField(max_length=30,default="New Folder");
+	in_folder = models.ForeignKey('Folder', default = -1);
+		
 #Model for report files, only includes a reference to the parent report and the file right now
 #Uploads files to ROOT/report_files/<username>/<filename>
 class Report_file(models.Model):
