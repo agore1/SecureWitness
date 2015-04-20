@@ -81,7 +81,7 @@ class ReportListView(ListView):
 				f = Folder();
 				f.name = request.POST["folder_name"];
 				f.author = request.user.username;
-				f.folder = self.folder.objects.filter(author=self.request.user.username,name="ROOT");
+				f.in_folder = self.folder.objects.filter(author=self.request.user.username,name="ROOT").all()[0];
 				f.save();
 		elif(request.POST["action_taken"] == "move"):
 			if(request.POST["to_folder"] == '-1'):
