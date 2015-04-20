@@ -251,5 +251,5 @@ def logout_view(request):
 def profile(request):
 	if request.user.is_authenticated():
 		c = {'user_name':request.user.username};
-		return render(request, 'registration\profile.html',c);
+		return render(request, 'registration/profile.html',c);
 	return redirect("/accounts/login/");

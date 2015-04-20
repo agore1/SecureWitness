@@ -40,6 +40,8 @@ INSTALLED_APPS = (
 	'registration',
 )
 
+ACCOUNT_ACTIVATION_DAYS = 3;
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
