@@ -36,7 +36,7 @@ class ReportListView(ListView):
 	
 	def get_queryset(self):
 		user = self.kwargs.get('slug','');
-		folder = self.kwargs.get('fold','');
+		folder = self.kwargs.get('fold','ROOT');
 		if(user != ''):
 			if(user != self.request.user.username):
 				object_list = self.model.objects.filter(author=user,private=False);
@@ -83,7 +83,10 @@ class ReportListView(ListView):
 				f.author = request.user.username;
 				f.save();
 		elif(request.POST["action_taken"] == "move"):
-			f = self.folder.objects.filter(id=request.POST["to_folder"]).all()[0];
+			if(request.POST["to_folder"] == '-1'):
+				f = self.folder.objects.filter(author=self.request.user.username,name="ROOT");
+			else:
+				f = self.folder.objects.filter(id=request.POST["to_folder"]).all()[0];
 			for key in (list)(request.POST.keys()):
 				if key[0:6] == "checkR":
 					reportID = request.POST[key];

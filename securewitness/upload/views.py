@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import RequestContext, loader
-from upload.models import Report, Report_file, Report_keyword#, ReportForm
+from upload.models import Report, Report_file, Report_keyword, Folder#, ReportForm
 from django.utils import timezone
 #from reports import formModels
 from django import forms
@@ -21,6 +21,14 @@ def report(request):
 	if request.method == 'POST':
 		form = ReportForm(request.POST,request.FILES)
 		if form.is_valid():
+			rootFormQuery = Folder.objects.filter(author=request.user.username,name="ROOT");
+			if(len(rootFormQuery) < 1):
+				rootForm = Folder();
+				rootForm.author = request.user.username;
+				rootForm.name = "ROOT"
+				rootForm.save();
+			else:
+				rootForm = rootFormQuery.all()[0];
 			r = Report(pub_date=timezone.now());
 			
 			#I should probably make this a loop or something
@@ -29,6 +37,7 @@ def report(request):
 			r.long_desc = form.cleaned_data["long_des"];
 			r.location = form.cleaned_data["location"];
 			r.private = form.cleaned_data["private"];
+			r.in_folder = rootForm;
 			r.save();
 			
 			#Create tags

@@ -19,6 +19,15 @@ def delete_report(report):
 		f.delete();
 	report.delete();
 	
+def dupe_report(report):
+	for k in report.report_keyword_set.all():
+		k.delete();
+	for f in report.report_file_set.all():
+		file = f.file;
+		if(os.path.isfile(file.path)):
+			os.remove(file.path);
+		f.delete();
+	
 def delete_folder(folder):
 	for r in folder.report_set.all():
 		delete_report(r);
