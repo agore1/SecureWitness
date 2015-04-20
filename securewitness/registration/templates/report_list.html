@@ -1,0 +1,105 @@
+<head>
+<style>
+.file_list{
+	margin-left: 5em;
+}
+
+.folder{
+	background-color: #EEEEFF;
+}
+
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.report_desc{
+	margin-left: 3em;
+}
+</style>
+
+<script>
+function showForm() {
+	var sel = document.getElementById("options").value;
+	if(sel == "mk_folder"){
+		document.getElementById("folder_name").hidden = false;
+		document.getElementById("folders").hidden = true;
+	}
+	else if(sel == "move"){
+		document.getElementById("folder_name").hidden = true;
+		document.getElementById("folders").hidden = false;
+	}
+	else{
+		document.getElementById("folder_name").hidden = true;
+		document.getElementById("folders").hidden = true;
+	}
+}
+</script>
+</head>
+
+<body>
+
+<h1>{{ user_name|default:"Anonymous"}}'s reports
+{% if folder %}/{{ folder }} {% endif %}
+</h1>
+
+<form id="action" action="/accounts/{{ user_name }}/reports/" method="post">{% csrf_token %}
+	
+	
+	<ul>
+	{% for report in object_list %}
+		<li>
+			
+			{% if report.pub_date %}
+			{% if editable %}
+			<input type="checkbox" name="checkR{{ report.id }}" value={{ report.id }}>
+			{% endif %}
+			{{ report.pub_date|date }} - {{ report.short_desc }}
+			<div class="report_desc">
+				{{ report.long_desc }}
+				<br>
+				Files:
+				{% for file in report.report_file_set.all %}
+				<li class="file_list">
+					{{ file.filename }}
+				</li>
+				{% empty %}
+				No files uploaded with the report.
+				{% endfor %}
+			</div>
+			{% else %}
+				<div class="folder">
+					<input type="checkbox" name="checkF{{ report.id }}" value={{ report.id }}>
+					<a href="/accounts/{{ user_name }}/{{ report.name }}/reports/">Folder - {{ report.name }}</a>
+				</div>
+			{% endif %}
+			
+		</li>
+	{% empty %}
+		<li>No visible reports uploaded.</li>
+	{% endfor %}
+	</ul>
+	{% if editable %}
+	<input type="submit" value="Action">
+	<select id="options" name="action_taken" form="action" onchange="showForm()">
+		<option value="move">Move to...</option>
+		<option value="delete">Delete</option>
+		<option value="mk_folder">Create Folder</option>
+	</select>
+	<input type="text" hidden="true" id="folder_name" name="folder_name">
+	<select id="folders" name="to_folder" form="action">
+		{% for f in folders %}
+			<option value="{{ f.id }}">{{ f.name }}</option>
+		{% endfor %}
+	</select>
+	{% endif %}
+</form>
+
+
+	<br>
+	<a href="/upload/report">Upload a report</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+	
+	
+	{{ debug }}	
+</body>

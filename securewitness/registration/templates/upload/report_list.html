@@ -1,0 +1,64 @@
+<head>
+<style>
+.file_list{
+	margin-left: 5em;
+}
+
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.report_desc{
+	margin-left: 3em;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h1>{{ user_name|default:"Anonymous"}}'s reports</h1>
+
+<form id="action" action="/accounts/{{ user_name }}/reports/" method="post">{% csrf_token %}
+	
+	
+	<ul>
+	{% for report in object_list %}
+		<li>
+			{% if editable %}
+			<input type="checkbox" name="check{{ report.id }}" value={{ report.id }}>
+			{% endif %}
+			{{ report.pub_date|date }} - {{ report.short_desc }}
+			<div class="report_desc">
+				{{ report.long_desc }}
+				<br>
+				Files:
+				{% for file in report.report_file_set.all %}
+				<li class="file_list">
+					{{ file.filename }}
+				</li>
+				{% empty %}
+				No files uploaded with the report.
+				{% endfor %}
+			</div>
+		</li>
+	{% empty %}
+		<li>No visible reports uploaded.</li>
+	{% endfor %}
+	</ul>
+	{% if editable %}
+	<input type="submit" value="Action">
+	
+	{% endif %}
+</form>
+
+
+	<br>
+	<a href="/upload/report">Upload a report</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+	
+	
+	{{ debug }}
+</body>

@@ -6,13 +6,100 @@ Views which allow users to create and activate accounts.
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth import logout
+from django.utils import timezone
+
+from itertools import chain
 
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
+from upload.models import Report, delete_report, Folder, delete_folder
 
+#def ReportEdit(request):
+#	return render(request, 'submit.html', {});
+	#return redirect("/accounts/"+request.user.username+"/reports");
+
+class ReportListView(ListView):
+
+	template_name = "report_list.html";
+
+	model = Report;
+	folder = Folder;
+	
+	slug = None;
+	
+	def get_object(self, queryset=None):
+		return queryset.get(slug=self.slug);
+	
+	def get_queryset(self):
+		user = self.kwargs.get('slug','');
+		folder = self.kwargs.get('fold','ROOT');
+		if(user != ''):
+			if(user != self.request.user.username):
+				object_list = self.model.objects.filter(author=user,private=False);
+			else:
+				if(folder == ""):
+					report_list = self.model.objects.filter(author=user,in_folder=-1);
+					folder_list = self.folder.objects.filter(author=user,in_folder=-1);
+				else:
+					f = self.folder.objects.filter(name=folder,author=user)[0];
+					report_list = self.model.objects.filter(author=user,in_folder=f.id);
+					folder_list = self.folder.objects.filter(author=user,in_folder=f.id);
+				object_list = chain(folder_list,report_list);
+		else:
+			object_list = [];
+		return object_list;
+	
+	def get_context_data(self, **kwargs):
+		con = super(ReportListView, self).get_context_data(**kwargs);
+		con['user_name'] = self.kwargs.get('slug',None);
+		if self.request.method == "POST":
+			con["user_name"] = "delete";
+		con['editable'] = False;
+		if(con["user_name"] == self.request.user.username):
+			con['editable'] = True;
+		con['folders'] = self.folder.objects.filter(author=self.request.user.username);
+		con['folder'] = self.kwargs.get('fold',None);
+		return con
+		
+	def post(self, request, *args, **kwargs):
+		if(request.POST["action_taken"] == "delete"):
+			for key in (list)(request.POST.keys()):
+				if key[0:6] == "checkR":
+					reportID = request.POST[key];
+					report = self.model.objects.filter(id=int(reportID))[0];
+					delete_report(report);
+				elif key[0:6] == "checkF":
+					folderID = request.POST[key];
+					folder = self.folder.objects.filter(id=int(folderID))[0];
+					delete_folder(folder);
+		elif(request.POST["action_taken"] == "mk_folder"):
+			if(request.POST["folder_name"] != ""):
+				f = Folder();
+				f.name = request.POST["folder_name"];
+				f.author = request.user.username;
+				f.save();
+		elif(request.POST["action_taken"] == "move"):
+			if(request.POST["to_folder"] == '-1'):
+				f = self.folder.objects.filter(author=self.request.user.username,name="ROOT");
+			else:
+				f = self.folder.objects.filter(id=request.POST["to_folder"]).all()[0];
+			for key in (list)(request.POST.keys()):
+				if key[0:6] == "checkR":
+					reportID = request.POST[key];
+					report = self.model.objects.filter(id=int(reportID))[0];
+					report.in_folder = f;
+					report.save();
+				elif key[0:6] == "checkF":
+					folderID = request.POST[key];
+					folder = self.folder.objects.filter(id=int(folderID))[0];
+					folder.in_folder = f;
+					folder.save();
+		return redirect("/accounts/"+request.user.username+"/reports/");
+		#return HttpResponse(request.POST.items());
 
 class _RequestPassingFormView(FormView):
     """

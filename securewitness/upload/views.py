@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import RequestContext, loader
-from upload.models import Report, Report_file, Report_keyword#, ReportForm
+from upload.models import Report, Report_file, Report_keyword, Folder#, ReportForm
 from django.utils import timezone
 #from reports import formModels
 from django import forms
 
+def search(request, slug):
+	
+
+	return HttpResponse(slug);
 
 # Create your views here.
 def report(request):
@@ -17,6 +21,14 @@ def report(request):
 	if request.method == 'POST':
 		form = ReportForm(request.POST,request.FILES)
 		if form.is_valid():
+			rootFormQuery = Folder.objects.filter(author=request.user.username,name="ROOT");
+			if(len(rootFormQuery) < 1):
+				rootForm = Folder();
+				rootForm.author = request.user.username;
+				rootForm.name = "ROOT"
+				rootForm.save();
+			else:
+				rootForm = rootFormQuery.all()[0];
 			r = Report(pub_date=timezone.now());
 			
 			#I should probably make this a loop or something
@@ -24,6 +36,8 @@ def report(request):
 			r.short_desc = form.cleaned_data["short_des"];
 			r.long_desc = form.cleaned_data["long_des"];
 			r.location = form.cleaned_data["location"];
+			r.private = form.cleaned_data["private"];
+			r.in_folder = rootForm;
 			r.save();
 			
 			#Create tags
@@ -40,7 +54,7 @@ def report(request):
 			f.report = r;
 			f.file = form.cleaned_data["file"];
 			f.save();
-			return HttpResponse("file uploaded!");
+			return redirect("/accounts/"+request.user.username+"/reports");
 	#If it's not a post, build the form
 	else:
 		c = {'form':ReportForm()};
@@ -52,6 +66,7 @@ class ReportForm(forms.Form):
 	short_des = forms.CharField(label="Short description", max_length = 50);
 	long_des = forms.CharField(label="Long description", max_length = 500);
 	location = forms.CharField(label="Location (optional)", max_length = 50,required=False);
+	private = forms.BooleanField(label="Private", required=False);
 	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
 	
 	file = forms.FileField(label="Report file");
