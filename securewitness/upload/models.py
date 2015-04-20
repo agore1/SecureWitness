@@ -51,6 +51,8 @@ class Folder(models.Model):
 	author = models.CharField(max_length=200,default="Anonymous");
 	name = models.CharField(max_length=30,default="New Folder");
 	in_folder = models.ForeignKey('Folder', default = -1);
+	def __str__(self):
+		return self.author + " -- " + self.name;
 		
 #Model for report files, only includes a reference to the parent report and the file right now
 #Uploads files to ROOT/report_files/<username>/<filename>
