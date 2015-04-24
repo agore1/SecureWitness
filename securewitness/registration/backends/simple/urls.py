@@ -37,6 +37,7 @@ urlpatterns = patterns('',
                            name='registration_complete'),
                        (r'', include('registration.auth_urls')),
 					   
+
 					   url(r'^profile',views.profile,name="user_profile"),
                        url(r'^login/$',views.login,name="user_login"),
 					   url(r'^logout/$',views.logout_view,name="user_logout"),

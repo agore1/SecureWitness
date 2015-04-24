@@ -14,6 +14,8 @@ from django.utils import timezone
 
 from itertools import chain
 
+from django.contrib.auth.models import User
+
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
 from upload.models import Report, delete_report, Folder, delete_folder
@@ -35,7 +37,7 @@ class ReportListView(ListView):
 		return queryset.get(slug=self.slug);
 	
 	def get_queryset(self):
-		user = self.kwargs.get('slug','');
+		user = self.kwargs.get('slug','');#).all()[0];
 		folder = self.kwargs.get('fold','ROOT');
 		if(user != ''):
 			if(user != self.request.user.username):
@@ -81,6 +83,7 @@ class ReportListView(ListView):
 				f = Folder();
 				f.name = request.POST["folder_name"];
 				f.author = request.user.username;
+				f.in_folder = self.folder.objects.filter(author=self.request.user.username,name="ROOT").all()[0];
 				f.save();
 		elif(request.POST["action_taken"] == "move"):
 			if(request.POST["to_folder"] == '-1'):
@@ -242,7 +245,7 @@ def login(request):
 		return render(request, 'login.html',c);
 	
 def logout_view(request):
-	logout(request);
+	logout(request,{'next_page':'/accounts/login/'});
 	if request.user.is_authenticated():
 		return HttpResponse("wat");
 	return redirect("/accounts/login/");
