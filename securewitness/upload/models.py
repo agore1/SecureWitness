@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ModelForm
+from django.contrib.auth.models import User
 
 import os
 # Create your models here.
@@ -35,6 +36,12 @@ def delete_folder(folder):
 		delete_folder(f);
 	folder.delete();
 	
+	
+
+class can_view(models.Model):
+	user = models.ForeignKey(User);
+	report = models.ForeignKey('Report', default = -1);
+
 #Model for the main report, what is there to say
 class Report(models.Model):
 	pub_date = models.DateTimeField('date published');
