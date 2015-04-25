@@ -1,5 +1,9 @@
+import os
+import mimetypes
+
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse,StreamingHttpResponse
+from django.core.servers.basehttp import FileWrapper
 from upload.models import Report, can_view, Report_file
 from django.contrib.auth.models import User
 
@@ -71,5 +75,25 @@ def detailed_report(request, username=None, report_id=None):
         else:
             report_list = Report.objects.filter(author=owner, id=repId, private=False)
     '''
+
+
     return HttpResponse(report_details)
 
+def download_report_files(request,username=None,report_id=None,file=0):
+    username = None
+    if not request.user.is_authenticated():
+        return HttpResponse("Sorry, you're not logged in.")
+    username = request.user.username
+    repId = report_id
+    uId = request.user.id
+    fileNum = file;
+    
+    
+    
+    fField = Report.objects.get(id=report_id).report_file_set.all()[fileNum].file
+    filePath = fField.name
+    fileName = os.path.basename(filePath)
+    chunk_size = 8192
+    response = StreamingHttpResponse(FileWrapper(open(filePath,mode='rb'),chunk_size),content_type=mimetypes.guess_type(filePath)[0])
+    response['Content-Disposition'] = 'attachment; filename=%s' % fileName
+    return response
