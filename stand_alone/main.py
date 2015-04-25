@@ -43,12 +43,28 @@ def main(ctx):
 @main.command()
 @click.pass_context
 def reports(ctx):
+    """List all reports that are visible to the current user."""
     session = ctx.obj['session']
-    click.echo(session.cookies)
     r = session.get('http://127.0.0.1:8000/accounts/' + ctx.obj['username'] + '/reports')
     click.echo(r.text)
     r = session.get('http://127.0.0.1:8000/standalone/reports/' + ctx.obj['username'] + '/')
     click.echo(r.text)
+
+@main.command()
+@click.pass_context
+def view(ctx):
+    """View the details of a report."""
+    session = ctx.obj['session']
+    r = session.get()
+
+
+@main.command()
+@click.pass_context
+def download(ctx):
+    """Download the files attached to a report."""
+    session = ctx.obj['session']
+    r = session.get()
+
 
 
 
