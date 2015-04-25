@@ -6,6 +6,8 @@ from registration import signals
 from registration.views import RegistrationView as BaseRegistrationView
 from registration.users import UserModel
 
+from upload.models import Folder
+
 
 class RegistrationView(BaseRegistrationView):
     """
@@ -15,12 +17,21 @@ class RegistrationView(BaseRegistrationView):
     up and logged in).
 
     """
+	
+    folder = Folder;
+	
     def register(self, request, **cleaned_data):
         username, email, password = cleaned_data['username'], cleaned_data['email'], cleaned_data['password1']
         UserModel().objects.create_user(username, email, password)
-
+		
         new_user = authenticate(username=username, password=password)
         login(request, new_user)
+		
+        f = self.folder();
+        f.author = username;
+        f.name = "ROOT";
+        f.save();
+		
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
                                      request=request)

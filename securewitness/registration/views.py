@@ -42,6 +42,8 @@ class ReportListView(ListView):
 		if(user != ''):
 			if(user != self.request.user.username):
 				object_list = self.model.objects.filter(author=user,private=False);
+				private_list = self.model.objects.filter(author=user,can_view__user_id = self.request.user.id);
+				object_list = chain(private_list,object_list);
 			else:
 				if(folder == ""):
 					report_list = self.model.objects.filter(author=user,in_folder=-1);
@@ -160,6 +162,8 @@ class RegistrationView(_RequestPassingFormView):
     http_method_names = ['get', 'post', 'head', 'options', 'trace']
     success_url = 'register/complete/'
     template_name = 'registration/registration_form.html'
+    users = User;
+    folder = Folder;
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -193,12 +197,19 @@ class RegistrationView(_RequestPassingFormView):
         return True
 
     def register(self, request, **cleaned_data):
+        u = cleaned_data["username"];
+        user = self.users.objects.get(username=u);
+        f = self.Folder();
+        f.author = u;
+        f.name = "ROOT";
+        f.save();
         """
         Implement user-registration logic here. Access to both the
         request and the full cleaned_data of the registration form is
         available here.
 
         """
+        return user;
         raise NotImplementedError
 
 
