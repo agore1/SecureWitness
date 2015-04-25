@@ -41,15 +41,15 @@ class ReportListView(ListView):
 		folder = self.kwargs.get('fold','ROOT');
 		if(user != ''):
 			if(user != self.request.user.username):
-				object_list = self.model.objects.filter(author=user,private=False);
+				object_list = self.model.objects.filter(author=user, private=False);
 			else:
-				if(folder == ""):
-					report_list = self.model.objects.filter(author=user,in_folder=-1);
-					folder_list = self.folder.objects.filter(author=user,in_folder=-1);
+				if folder == "":
+					report_list = self.model.objects.filter(author=user, in_folder=-1);
+					folder_list = self.folder.objects.filter(author=user, in_folder=-1);
 				else:
-					f = self.folder.objects.filter(name=folder,author=user)[0];
-					report_list = self.model.objects.filter(author=user,in_folder=f.id);
-					folder_list = self.folder.objects.filter(author=user,in_folder=f.id);
+					f = self.folder.objects.filter(name=folder, author=user)[0];
+					report_list = self.model.objects.filter(author=user, in_folder=f.id);
+					folder_list = self.folder.objects.filter(author=user, in_folder=f.id);
 				object_list = chain(folder_list,report_list);
 		else:
 			object_list = [];

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from upload.models import Report
+from upload.models import Report, can_view, Report_file
 from django.contrib.auth.models import User
 
 # Create your views here.
@@ -18,6 +18,14 @@ def reports(request, username=None):
     return HttpResponse(username)
 
 
+# Take a report and format it into a string
+def format_report(report):
+    report_details = ""
+    report_details += 'Short Description: {0} \nLong Description: {1} \n'.format(report.short_desc, report.long_desc)
+    report_details += 'Publish date: {0} \nAuthor: {1}\nLocation: {2} \n'.format(report.pub_date, report.author, report.location)
+    return report_details
+
+
 # View to return a detailed report view based on the username and report id, passed in from url regex
 def detailed_report(request, username=None, report_id=None):
     username = None
@@ -32,16 +40,28 @@ def detailed_report(request, username=None, report_id=None):
     # The report is public
     report = Report.objects.filter(id=repId, private=False)
     if report.exists():
-        report_details = report
+        report_details = "This report is public."
+        report_details += format_report(report[0])
 
     # Current user is the owner of the report
     elif Report.objects.filter(id=repId, private=True, author=username).exists():
-        report_details = Report.objects.filter(id=repId, private=True, author=username)
+        report = Report.objects.filter(id=repId, private=True, author=username)
+        report_details = "You are the owner of this report.\n"
+        report_details += format_report(report[0])
 
     # Or the current user has been granted permission to view it
-    elif Report.objects.filter(can_view__report_id=repId, id=uId).exists:
-        # TODO: Change the report object
-        pass
+    elif Report.objects.filter(can_view__report_id=repId, can_view__user_id=uId).exists():
+        report_details = "This report has been shared with you:\n\n"
+        report = Report.objects.filter(can_view__report_id=repId, can_view__user_id=uId)[0]
+        report_details += format_report(report)
+        attached_files = Report_file.objects.filter(report_id=repId)
+        if attached_files.exists():
+            report_details += "The attached files are: \n"
+            for file in attached_files:
+                report_details = report_details + str(file) + '\n'
+        hint = "Execute secwit download <filename> <report id> to download attached files. "
+        report_details += hint
+
     '''
     if owner == request.user.username:
         report_list = Report.objects.filter(author=owner, id=repId)
