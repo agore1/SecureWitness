@@ -79,18 +79,16 @@ def detailed_report(request, username=None, report_id=None):
 
     return HttpResponse(report_details)
 
-def download_report_file(request,username=None,report_id=None,file=0):
+def download_report_file(request,username=None,report_id=None,fileN=0):
     username = None
     if not request.user.is_authenticated():
         return HttpResponse("Sorry, you're not logged in.")
     username = request.user.username
     repId = report_id
     uId = request.user.id
-    fileNum = file;
+    fileNum = fileN;
     
-    
-    
-    fField = Report.objects.get(id=report_id).report_file_set.all()[fileNum].file
+    fField = Report.objects.get(id=repId).report_file_set.all()[0].file
     filePath = fField.name
     fileName = os.path.basename(filePath)
     chunk_size = 8192
