@@ -79,7 +79,7 @@ def detailed_report(request, username=None, report_id=None):
 
     return HttpResponse(report_details)
 
-def download_report_files(request,username=None,report_id=None,file=0):
+def download_report_file(request,username=None,report_id=None,file=0):
     username = None
     if not request.user.is_authenticated():
         return HttpResponse("Sorry, you're not logged in.")
