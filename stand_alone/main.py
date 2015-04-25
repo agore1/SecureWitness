@@ -32,17 +32,24 @@ def main(ctx):
     # TODO: Check for login success
     click.echo(r.text)
     click.echo("You are logged in now.")
-    click.echo(s.cookies)
-    # ctx.obj['session'] = s
-    ctx.obj = s
+    # click.echo(s.cookies)
+
+    # Create a dictionary to store variables to be passed to reports method
+    ctx.obj = {}
+    ctx.obj['session'] = s
+    ctx.obj['username'] = username
+    # ctx.obj = s
 
 @main.command()
 @click.pass_context
 def reports(ctx):
-    # session = ctx.obj['session']
-    click.echo(ctx.obj.cookies)
-    r = ctx.obj.get('http://127.0.0.1:8000/accounts/test10/reports')
+    session = ctx.obj['session']
+    click.echo(session.cookies)
+    r = session.get('http://127.0.0.1:8000/accounts/' + ctx.obj['username'] + '/reports')
     click.echo(r.text)
+    r = session.get('http://127.0.0.1:8000/standalone/reports/' + ctx.obj['username'] + '/')
+    click.echo(r.text)
+
 
 
 @login.command()
