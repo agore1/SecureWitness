@@ -45,13 +45,13 @@ class ReportListView(ListView):
 				private_list = self.model.objects.filter(author=user,can_view__user_id = self.request.user.id);
 				object_list = chain(private_list,object_list);
 			else:
-				if(folder == ""):
-					report_list = self.model.objects.filter(author=user,in_folder=-1);
-					folder_list = self.folder.objects.filter(author=user,in_folder=-1);
+				if folder == "":
+					report_list = self.model.objects.filter(author=user, in_folder=-1);
+					folder_list = self.folder.objects.filter(author=user, in_folder=-1);
 				else:
-					f = self.folder.objects.filter(name=folder,author=user)[0];
-					report_list = self.model.objects.filter(author=user,in_folder=f.id);
-					folder_list = self.folder.objects.filter(author=user,in_folder=f.id);
+					f = self.folder.objects.filter(name=folder, author=user)[0];
+					report_list = self.model.objects.filter(author=user, in_folder=f.id);
+					folder_list = self.folder.objects.filter(author=user, in_folder=f.id);
 				object_list = chain(folder_list,report_list);
 		else:
 			object_list = [];

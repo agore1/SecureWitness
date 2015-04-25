@@ -30,7 +30,7 @@ def main(ctx):
     r = s.post('http://127.0.0.1:8000/accounts/login/', data=payload)
     # r = s.get('http://127.0.0.1:8000/accounts/profile/')
     # TODO: Check for login success
-    click.echo(r.text)
+    # click.echo(r.text)
     click.echo("You are logged in now.")
     # click.echo(s.cookies)
 
@@ -51,11 +51,13 @@ def reports(ctx):
     click.echo(r.text)
 
 @main.command()
+@click.argument('report_id', default=1)
 @click.pass_context
-def view(ctx):
+def view(ctx, report_id):
     """View the details of a report."""
     session = ctx.obj['session']
-    r = session.get()
+    r = session.get('http://127.0.0.1:8000/standalone/viewreport/' + ctx.obj['username'] + '/' + str(report_id) + '/')
+    click.echo(r.text)
 
 
 @main.command()
