@@ -3,25 +3,24 @@ import click
 import requests
 from simplecrypt import encrypt, decrypt
 
-s = requests.Session()  # Session variable keeps cookies intact for authentication
+# s = requests.Session()  # Session variable keeps cookies intact for authentication
 
 
 @click.group()
-def main():
+def login():
     pass
     # click.echo('This is the standalone program.')
     # Program wide system variables for maintaining authentication
 
 
-
-
-@main.command()
-def login():
+@click.group()
+@click.pass_context   # This enables passing a session context variable for staying logged in.
+def main(ctx):
     """Authenticate with the Secure Witness server."""
     username = click.prompt('Please enter your username', type=str)
     password = click.prompt('Please enter your password', hide_input=True, type=str)
     # click.echo('The username was: {0} and the password was: {1}'.format(username, password))
-
+    s = requests.Session()
     login_response = s.get('http://127.0.0.1:8000/accounts/login/')  # Obtain a csrf cookie
     # click.echo(login_response.text)
     # click.echo('\n The login cookie was: \n')
@@ -34,9 +33,19 @@ def login():
     click.echo(r.text)
     click.echo("You are logged in now.")
     click.echo(s.cookies)
-
+    # ctx.obj['session'] = s
+    ctx.obj = s
 
 @main.command()
+@click.pass_context
+def reports(ctx):
+    # session = ctx.obj['session']
+    click.echo(ctx.obj.cookies)
+    r = ctx.obj.get('http://127.0.0.1:8000/accounts/test10/reports')
+    click.echo(r.text)
+
+
+@login.command()
 def dec():
     """Decrypt an encrypted file."""
     filename = click.prompt('Please enter the filename to decrypt', type=str)
@@ -50,7 +59,7 @@ def dec():
     click.echo('Finished decrypting the file.')
 
 
-@main.command()
+@login.command()
 def enc():
     """Encrypt a file."""
     filename = click.prompt('Please enter the filename to be encrypted', type=str)
@@ -64,7 +73,7 @@ def enc():
     click.echo('Finished encrypting out file.')
 
 
-@main.command()
+@login.command()
 def listreports():
     """List all reports that are visible to the logged-in user"""
     click.echo(s.cookies)
