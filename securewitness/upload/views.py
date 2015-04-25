@@ -1,10 +1,14 @@
+import os
+import mimetypes
+
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse,StreamingHttpResponse
 from django.template import RequestContext, loader
 from upload.models import Report, Report_file, Report_keyword, Folder, can_view#, ReportForm
 from django.utils import timezone
 from django.views.generic.list import ListView
-
+from django.core.files.storage import default_storage, File
+from django.core.servers.basehttp import FileWrapper
 from django.contrib.auth.models import User
 #from reports import formModels
 from django import forms
@@ -35,27 +39,24 @@ class see_report(ListView):
 		return redirect("/report/"+request.user.username+"/"+rId);
 	
 	def get(self, request, *args, **kwargs):
-		
+		owner = self.kwargs.get('user','');
+		rId = self.kwargs.get('report','');
+		'''
+		if(owner == "Curlystraw"):
+			fField = self.report.objects.get(id=rId).report_file_set.all()[0].file;
+			filePath = self.report.objects.get(id=rId).report_file_set.all()[0].file.name;
+			fileName = os.path.basename(filePath);
+			chunk_size = 8192;
+			response = StreamingHttpResponse(FileWrapper(open(filePath,mode='rb'),chunk_size),content_type=mimetypes.guess_type(filePath)[0]);
+			response['Content-Disposition'] = 'attachment; filename=%s' % fileName;
+			#return HttpResponse(response.reason_phrase);
+			return response;
+		'''
 		return super(see_report, self).get(request, *args, **kwargs);
 	def get_queryset(self):
 		owner = self.kwargs.get('user','');#).all()[0];
 		repId = self.kwargs.get('report','');
 		uId = self.request.user.id;
-		'''if(user != ''):
-			if(user != self.request.user.username):
-				object_list = self.model.objects.filter(author=user,private=False);
-			else:
-				if(folder == ""):
-					report_list = self.model.objects.filter(author=user,in_folder=-1);
-					folder_list = self.folder.objects.filter(author=user,in_folder=-1);
-				else:
-					f = self.folder.objects.filter(name=folder,author=user)[0];
-					report_list = self.model.objects.filter(author=user,in_folder=f.id);
-					folder_list = self.folder.objects.filter(author=user,in_folder=f.id);
-				object_list = chain(folder_list,report_list);
-		else:
-			object_list = [];
-		'''
 		if(owner == self.request.user.username):
 			object_list = self.report.objects.filter(author=owner,id=repId);
 		else:
