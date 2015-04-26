@@ -3,27 +3,67 @@ import click
 import requests
 from simplecrypt import encrypt, decrypt
 
+# s = requests.Session()  # Session variable keeps cookies intact for authentication
+
+
 @click.group()
-def main():
-    click.echo('This is the standalone program.')
-
-
-@main.command()
 def login():
+    pass
+    # click.echo('This is the standalone program.')
+    # Program wide system variables for maintaining authentication
+
+
+@click.group()
+@click.pass_context   # This enables passing a session context variable for staying logged in.
+def main(ctx):
     """Authenticate with the Secure Witness server."""
     username = click.prompt('Please enter your username', type=str)
     password = click.prompt('Please enter your password', hide_input=True, type=str)
-    click.echo('The username was: {0} and the password was: {1}'.format(username, password))
-
+    # click.echo('The username was: {0} and the password was: {1}'.format(username, password))
     s = requests.Session()
-    s.get('http://httpbin.org/cookies/set/sessioncookie/123456789')
-    r = s.get("http://httpbin.org/cookies")
-    click.echo(r.text)
-    # response = urllib.request.urlopen('http://127.0.0.1:8000/standalone/')
-    # html = response.read()
-    # click.echo(html)
+    login_response = s.get('http://127.0.0.1:8000/accounts/login/')  # Obtain a csrf cookie
+    # Format form data for authentication
+    payload = {'password': password, 'username': username, 'csrfmiddlewaretoken': login_response.cookies['csrftoken']}
+    r = s.post('http://127.0.0.1:8000/accounts/login/', data=payload)
+    # TODO: Check for login success
+    click.echo("You are logged in now.")
+
+    # Create a dictionary to store variables to be passed to reports method
+    ctx.obj = {}
+    ctx.obj['session'] = s
+    ctx.obj['username'] = username
 
 @main.command()
+@click.pass_context
+def reports(ctx):
+    """List all reports that are visible to the current user."""
+    session = ctx.obj['session']
+    # r = session.get('http://127.0.0.1:8000/accounts/' + ctx.obj['username'] + '/reports')
+    # click.echo(r.text)
+    r = session.get('http://127.0.0.1:8000/standalone/reports/' + ctx.obj['username'] + '/')
+    click.echo(r.text)
+
+@main.command()
+@click.argument('report_id', default=1)
+@click.pass_context
+def view(ctx, report_id):
+    """View the details of a report."""
+    session = ctx.obj['session']
+    r = session.get('http://127.0.0.1:8000/standalone/viewreport/' + ctx.obj['username'] + '/' + str(report_id) + '/')
+    click.echo(r.text)
+
+
+@main.command()
+@click.pass_context
+def download(ctx):
+    """Download the files attached to a report."""
+    session = ctx.obj['session']
+    r = session.get('http://127.0.0.1:8000/standalone/download/' + ctx.obj['username'] + '/')
+    # TODO Finish up report downloading
+
+
+
+@login.command()
 def dec():
     """Decrypt an encrypted file."""
     filename = click.prompt('Please enter the filename to decrypt', type=str)
@@ -37,9 +77,9 @@ def dec():
     click.echo('Finished decrypting the file.')
 
 
-@main.command()
+@login.command()
 def enc():
-    """Debug only: encrypt a file."""
+    """Encrypt a file."""
     filename = click.prompt('Please enter the filename to be encrypted', type=str)
     password = click.prompt('Please enter your password', hide_input=True, type=str)
     # Open the file and encrypt it
@@ -51,5 +91,10 @@ def enc():
     click.echo('Finished encrypting out file.')
 
 
-
+@login.command()
+def listreports():
+    """List all reports that are visible to the logged-in user"""
+    click.echo(s.cookies)
+    # r = s.get('http://127.0.0.1:8000/accounts/profile/')
+    # click.echo(r.text)
 

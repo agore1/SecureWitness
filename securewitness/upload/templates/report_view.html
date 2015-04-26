@@ -1,0 +1,54 @@
+<head>
+
+<style>
+.report_desc{
+	margin-left: 3em;
+}
+</style>
+
+</head>
+
+<body>
+{% for report in object_list %}
+	<h1>{{ report.short_desc }} </h1>
+	<p>
+		{{ report.long_desc }}
+	</p>
+	{% if report.location %}
+		Location: {{ report.location }}
+	{% endif %}
+	<p>
+	Tags: <i>{% for key in report.report_keyword_set.all %}
+			{{key.keyword}}
+	{% empty %}
+		None
+	{% endfor %}
+	</i></p>
+	<br>
+	<h3>Files:</h3>
+	{% for f in report.report_file_set.all %}
+	<li class="report_desc">
+		{{ f.filename }}
+	</li>
+	{% endfor %}
+	<p>
+	{% if report.private %}
+	<i>This report is private</i>
+	<br>
+	<br>
+	{% if editable %}
+	<p>
+	<form id="add_user" action="/report/{{user_name}}/{{report.id}}/" method="post">{% csrf_token %}
+	Give a user permission to see this report: <input name="user_permission" type="text"><input type="submit" value="Add">
+	</form>
+	</p>
+	{% endif %}
+	{% endif %}
+	</p>
+	
+{% empty %}
+	No report with this ID exists.
+{% endfor %}
+
+
+</body>

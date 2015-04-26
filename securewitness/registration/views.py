@@ -14,6 +14,8 @@ from django.utils import timezone
 
 from itertools import chain
 
+from django.contrib.auth.models import User
+
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
 from upload.models import Report, delete_report, Folder, delete_folder
@@ -35,19 +37,21 @@ class ReportListView(ListView):
 		return queryset.get(slug=self.slug);
 	
 	def get_queryset(self):
-		user = self.kwargs.get('slug','');
+		user = self.kwargs.get('slug','');#).all()[0];
 		folder = self.kwargs.get('fold','ROOT');
 		if(user != ''):
 			if(user != self.request.user.username):
 				object_list = self.model.objects.filter(author=user,private=False);
+				private_list = self.model.objects.filter(author=user,can_view__user_id = self.request.user.id);
+				object_list = chain(private_list,object_list);
 			else:
-				if(folder == ""):
-					report_list = self.model.objects.filter(author=user,in_folder=-1);
-					folder_list = self.folder.objects.filter(author=user,in_folder=-1);
+				if folder == "":
+					report_list = self.model.objects.filter(author=user, in_folder=-1);
+					folder_list = self.folder.objects.filter(author=user, in_folder=-1);
 				else:
-					f = self.folder.objects.filter(name=folder,author=user)[0];
-					report_list = self.model.objects.filter(author=user,in_folder=f.id);
-					folder_list = self.folder.objects.filter(author=user,in_folder=f.id);
+					f = self.folder.objects.filter(name=folder, author=user)[0];
+					report_list = self.model.objects.filter(author=user, in_folder=f.id);
+					folder_list = self.folder.objects.filter(author=user, in_folder=f.id);
 				object_list = chain(folder_list,report_list);
 		else:
 			object_list = [];
@@ -81,6 +85,7 @@ class ReportListView(ListView):
 				f = Folder();
 				f.name = request.POST["folder_name"];
 				f.author = request.user.username;
+				f.in_folder = self.folder.objects.filter(author=self.request.user.username,name="ROOT").all()[0];
 				f.save();
 		elif(request.POST["action_taken"] == "move"):
 			if(request.POST["to_folder"] == '-1'):
@@ -157,6 +162,8 @@ class RegistrationView(_RequestPassingFormView):
     http_method_names = ['get', 'post', 'head', 'options', 'trace']
     success_url = 'register/complete/'
     template_name = 'registration/registration_form.html'
+    users = User;
+    folder = Folder;
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -190,12 +197,19 @@ class RegistrationView(_RequestPassingFormView):
         return True
 
     def register(self, request, **cleaned_data):
+        u = cleaned_data["username"];
+        user = self.users.objects.get(username=u);
+        f = self.Folder();
+        f.author = u;
+        f.name = "ROOT";
+        f.save();
         """
         Implement user-registration logic here. Access to both the
         request and the full cleaned_data of the registration form is
         available here.
 
         """
+        return user;
         raise NotImplementedError
 
 
@@ -242,7 +256,7 @@ def login(request):
 		return render(request, 'login.html',c);
 	
 def logout_view(request):
-	logout(request);
+	logout(request,{'next_page':'/accounts/login/'});
 	if request.user.is_authenticated():
 		return HttpResponse("wat");
 	return redirect("/accounts/login/");
