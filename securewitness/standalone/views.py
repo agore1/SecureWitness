@@ -100,7 +100,19 @@ def detailed_report(request, username=None, report_id=None):
     return HttpResponse(report_details)
 
 
-def can_access():
+def can_access(username, report_id, user_id):
+    canview = False
+    # Can view if:
+    # The report is public
+    public = Report.objects.filter(id=report_id, private=False).exists()
+    # Current user is the owner of the report
+    owner = Report.objects.filter(id=report_id, private=True, author=username).exists()
+    # Or the current user has been granted permission to view it
+    shared = Report.objects.filter(can_view__report_id=report_id, can_view__user_id=user_id).exists()
+    canview = public or owner or shared
+    return canview
+
+
     pass
 
 def download_report_file(request,username=None,report_id=None,fileN=0):
@@ -112,6 +124,8 @@ def download_report_file(request,username=None,report_id=None,fileN=0):
     repId = report_id
     uId = request.user.id
     fileNum = fileN;
+    if not can_access(username, repId, uId):
+        return HttpResponse("Sorry, you don't have permission to download this.")
     
     fField = Report.objects.get(id=repId).report_file_set.all()[0].file
     filePath = fField.name
