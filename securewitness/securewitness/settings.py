@@ -36,8 +36,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'upload',
-	'registration',
+    'upload',
+    'registration',
 )
 
 ACCOUNT_ACTIVATION_DAYS = 3;
