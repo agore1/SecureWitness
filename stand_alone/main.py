@@ -22,31 +22,24 @@ def main(ctx):
     # click.echo('The username was: {0} and the password was: {1}'.format(username, password))
     s = requests.Session()
     login_response = s.get('http://127.0.0.1:8000/accounts/login/')  # Obtain a csrf cookie
-    # click.echo(login_response.text)
-    # click.echo('\n The login cookie was: \n')
-    # click.echo(login_response.cookies['csrftoken'])
     # Format form data for authentication
     payload = {'password': password, 'username': username, 'csrfmiddlewaretoken': login_response.cookies['csrftoken']}
     r = s.post('http://127.0.0.1:8000/accounts/login/', data=payload)
-    # r = s.get('http://127.0.0.1:8000/accounts/profile/')
     # TODO: Check for login success
-    # click.echo(r.text)
     click.echo("You are logged in now.")
-    # click.echo(s.cookies)
 
     # Create a dictionary to store variables to be passed to reports method
     ctx.obj = {}
     ctx.obj['session'] = s
     ctx.obj['username'] = username
-    # ctx.obj = s
 
 @main.command()
 @click.pass_context
 def reports(ctx):
     """List all reports that are visible to the current user."""
     session = ctx.obj['session']
-    r = session.get('http://127.0.0.1:8000/accounts/' + ctx.obj['username'] + '/reports')
-    click.echo(r.text)
+    # r = session.get('http://127.0.0.1:8000/accounts/' + ctx.obj['username'] + '/reports')
+    # click.echo(r.text)
     r = session.get('http://127.0.0.1:8000/standalone/reports/' + ctx.obj['username'] + '/')
     click.echo(r.text)
 
@@ -65,8 +58,8 @@ def view(ctx, report_id):
 def download(ctx):
     """Download the files attached to a report."""
     session = ctx.obj['session']
-    r = session.get()
-
+    r = session.get('http://127.0.0.1:8000/standalone/download/' + ctx.obj['username'] + '/')
+    # TODO Finish up report downloading
 
 
 

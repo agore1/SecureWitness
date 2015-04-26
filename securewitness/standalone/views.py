@@ -23,16 +23,23 @@ def format_report_short(report):
 # View to return reports based on the username, passed in from url regex
 def reports(request, username=None):
     reply = ""
-    # Search for all reports that are visible to this user
-    # Reports are visible if they are:
+    # Search for all reports that are visible to this user. Reports are visible if they are:
     # Public
-    reports = Report.objects.filter(private=False)
+    public_reports = Report.objects.filter(private=False)
     # Format these into a string or list of some sort
-    for report in reports:
-        reply += format_report_short(report)
+    for report in public_reports:
+        reply += "Public: " + format_report_short(report)
 
     # Owned by the user requesting them
+    user_reports = Report.objects.filter(private=True, author=username)
+    for report in user_reports:
+        reply += "Owned: " + format_report_short(report)
+
     # Or shared to the user requesting them
+    shared_reports = Report.objects.filter(can_view__user_id=request.user.id)
+    for report in shared_reports:
+        reply += "Shared: " + format_report_short(report)
+
     return HttpResponse(reply)
 
 
@@ -79,19 +86,8 @@ def detailed_report(request, username=None, report_id=None):
                 report_details = report_details + str(file) + '\n'
         hint = "Execute secwit download <filename> <report id> to download attached files. "
         report_details += hint
-
-    '''
-    if owner == request.user.username:
-        report_list = Report.objects.filter(author=owner, id=repId)
-    else:
-        if User.objects.filter(can_view__report_id=repId, id=uId).exists():
-            report_list = Report.objects.filter(author=owner, id=repId)
-        else:
-            report_list = Report.objects.filter(author=owner, id=repId, private=False)
-    '''
-
-
     return HttpResponse(report_details)
+
 
 def download_report_file(request,username=None,report_id=None,fileN=0):
     username = None

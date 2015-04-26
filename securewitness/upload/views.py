@@ -136,7 +136,7 @@ class ReportForm(forms.Form):
 	private = forms.BooleanField(label="Private", required=False);
 	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
 	
-	file = forms.FileField(label="Report file");
+	file = forms.FileField(label="Report file", required=False);
 	
 #Unused file upload method, before the use of formModels.
 def handle_uploaded_file(f,name):
