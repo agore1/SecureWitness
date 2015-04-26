@@ -44,7 +44,7 @@ def reports(ctx):
     click.echo(r.text)
 
 @main.command()
-@click.argument('report_id', default=1)
+@click.argument('report_id', default=1, required=True)
 @click.pass_context
 def view(ctx, report_id):
     """View the details of a report."""
@@ -54,12 +54,25 @@ def view(ctx, report_id):
 
 
 @main.command()
+@click.argument('report_id', default=-1, required=True)
+@click.argument('file_num', default=-1, required=True)
 @click.pass_context
-def download(ctx):
+def download(ctx, report_id, file_num):
     """Download the files attached to a report."""
-    session = ctx.obj['session']
-    r = session.get('http://127.0.0.1:8000/standalone/download/' + ctx.obj['username'] + '/')
-    # TODO Finish up report downloading
+    # Guidance on downloading from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
+    if report_id > 0 and file_num > 0:
+        local_filename = click.prompt("What would you like to call the file you're downloading?", type=str)
+        session = ctx.obj['session']
+        url = 'http://127.0.0.1:8000/standalone/download/' + ctx.obj['username'] + '/' + str(report_id) + '/' + str(file_num)
+        r = session.get(url, stream=True)
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        click.echo("File downloaded.")
+    else:
+        click.echo("Please enter valid input for report_id and file_num")
 
 
 

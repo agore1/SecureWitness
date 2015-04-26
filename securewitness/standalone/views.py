@@ -17,6 +17,7 @@ def login(request):
 # Take a report and format a few fields into a brief string
 def format_report_short(report):
     report_details = ""
+    report_details += 'Report id: {0} '.format(report.id)
     report_details += 'Short Description: {0} \nPublish date: {1} \nAuthor: {2}\n\n'.format(report.short_desc, report.pub_date, report.author)
     return report_details
 
@@ -51,6 +52,20 @@ def format_report_long(report):
     return report_details
 
 
+def format_files(report_id):
+    """Format a string for all attached files."""
+    file_details = ""
+    attached_files = Report_file.objects.filter(report_id=report_id)
+    if attached_files.exists():
+        file_details += "The attached files are: \n"
+        for file in attached_files:
+            file_details += "Filenumber: " + str(file.id) + " Filename: " + str(file) + '\n'
+        hint = "Execute secwit download <report id> <file number> to download attached files. "
+        file_details += hint
+    else:
+        file_details += "No attached files."
+    return file_details
+
 # View to return a detailed report view based on the username and report id, passed in from url regex
 def detailed_report(request, username=None, report_id=None):
     username = None
@@ -59,40 +74,40 @@ def detailed_report(request, username=None, report_id=None):
     username = request.user.username
     repId = report_id
     uId = request.user.id
-    report_details = 'Sorry, that report either does not exist or is not visible to you.'
+    report_details = ''
 
     # Can view if:
     # The report is public
     report = Report.objects.filter(id=repId, private=False)
     if report.exists():
-        report_details = "This report is public."
+        report_details = "This report is public.\n"
         report_details += format_report_long(report[0])
-
+        report_details += format_files(repId)
     # Current user is the owner of the report
     elif Report.objects.filter(id=repId, private=True, author=username).exists():
         report = Report.objects.filter(id=repId, private=True, author=username)
         report_details = "You are the owner of this report.\n"
         report_details += format_report_long(report[0])
-
+        report_details += format_files(repId)
     # Or the current user has been granted permission to view it
     elif Report.objects.filter(can_view__report_id=repId, can_view__user_id=uId).exists():
         report_details = "This report has been shared with you:\n\n"
         report = Report.objects.filter(can_view__report_id=repId, can_view__user_id=uId)[0]
         report_details += format_report_long(report)
-        attached_files = Report_file.objects.filter(report_id=repId)
-        if attached_files.exists():
-            report_details += "The attached files are: \n"
-            for file in attached_files:
-                report_details = report_details + str(file) + '\n'
-        hint = "Execute secwit download <filename> <report id> to download attached files. "
-        report_details += hint
+        report_details += format_files(repId)
+    else:
+        report_details = "Sorry, that report either does not exist or is not visible to you."
     return HttpResponse(report_details)
 
+
+def can_access():
+    pass
 
 def download_report_file(request,username=None,report_id=None,fileN=0):
     username = None
     if not request.user.is_authenticated():
         return HttpResponse("Sorry, you're not logged in.")
+    # Check to make sure that the requester owns the report or has access to it.
     username = request.user.username
     repId = report_id
     uId = request.user.id
