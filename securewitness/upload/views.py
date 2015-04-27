@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage, File
 from django.core.servers.basehttp import FileWrapper
 from django.contrib.auth.models import User
 from django.db.models import Q
+from registration.models import Group
 #from reports import formModels
 from django import forms
 
@@ -30,7 +31,7 @@ class search(ListView):
     
     def get_queryset(self):
         object_list = self.reports.objects.filter(private=False);
-        private_list = self.reports.objects.filter(can_view__user = self.request.user.id);
+        private_list = self.reports.objects.filter(Q(can_view__user = self.request.user.id)|Q(can_view__group__in_group__user_id = self.request.user.id));
         filterArgs = {};
         for k in list(self.pDict.keys()):
             if self.pDict[k] != '':
@@ -71,6 +72,7 @@ class see_report(ListView):
     
     report = Report;
     users = User;
+    groups = Group;
     viewKeys = can_view;
     
     def post(self, request, *args, **kwargs):
@@ -81,18 +83,36 @@ class see_report(ListView):
         if(postDict["user_permission"] != '' and postDict["action"] == "Add"):
             #Create can_view() entry that relates the user and report
             uName = postDict["user_permission"];
-            uId = self.users.objects.filter(username=uName).all()[0].id;
-            if(len(self.viewKeys.objects.filter(user_id=uId,id=rId).all()) < 1):
-                viewKey = can_view();
-                viewKey.user = self.users.objects.filter(username=uName).all()[0];
-                viewKey.report = self.report.objects.filter(id=rId).all()[0];
-                viewKey.save();
+            if(postDict["entity"] == "user"):
+                userQuery = self.users.objects.filter(username=uName);
+                if userQuery:
+                    uId = userQuery.all()[0].id;
+                    if(len(self.viewKeys.objects.filter(user=uId,report=rId).all()) < 1):
+                        viewKey = can_view();
+                        viewKey.user = self.users.objects.filter(username=uName).all()[0];
+                        viewKey.report = self.report.objects.filter(id=rId).all()[0];
+                        viewKey.save();
+            elif(postDict["entity"] == "group"):
+                groupQuery = self.groups.objects.filter(name=uName);
+                if groupQuery:
+                    gId = groupQuery.all()[0].id;
+                    if(len(self.viewKeys.objects.filter(group=gId,report=rId).all()) < 1):
+                        viewKey = can_view();
+                        viewKey.group = self.groups.objects.get(id=gId);
+                        viewKey.report = self.report.objects.filter(id=rId).all()[0];
+                        viewKey.save();
         #if the action selected is to remove...
         elif(postDict["action"] == "Remove"):
-            uName = postDict["user_removed"];
-            uId = self.users.objects.get(username=uName);
-            viewKey = self.viewKeys.objects.get(user_id=uId,report=rId);
-            viewKey.delete();
+            if(postDict["entity"] == "user" and list(postDict.keys()).count("user_removed") > 0):
+                uName = postDict["user_removed"];
+                uId = self.users.objects.get(username=uName);
+                viewKey = self.viewKeys.objects.get(user_id=uId,report=rId);
+                viewKey.delete();
+            elif(postDict["entity"] == "group" and list(postDict.keys()).count("group_removed") > 0):
+                gName = postDict["group_removed"];
+                gId = self.groups.objects.get(name=gName);
+                viewKey = self.viewKeys.objects.get(group_id=gId,report=rId);
+                viewKey.delete();
         return redirect("/report/"+request.user.username+"/"+rId);
     
     def get(self, request, *args, **kwargs):
@@ -133,6 +153,7 @@ class see_report(ListView):
         if(con["owner_name"] == self.request.user.username):
             con['editable'] = True;
             con['user_permissions'] = self.users.objects.filter(can_view__report_id=self.kwargs.get('report',''));
+            con['group_permissions'] = self.groups.objects.filter(can_view__report_id=self.kwargs.get('report',''));
         #con['folders'] = self.folder.objects.filter(author=self.request.user.username);
         #con['folder'] = self.kwargs.get('fold',None);
         return con

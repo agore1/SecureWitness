@@ -8,16 +8,27 @@
 <script>
 function showForm() {
 	var sel = document.getElementById("option").value;
+    var entity = document.getElementById("entity").value;
 	if(sel == "Add"){
 		document.getElementById("add").hidden = false;
 		document.getElementById("remove").hidden = true;
         document.getElementById("sub").value = "Add";
+        
 	}
 	else{
 		document.getElementById("remove").hidden = false;
 		document.getElementById("add").hidden = true;
         document.getElementById("sub").value = "Remove";
 	}
+    
+    if(entity == "user"){
+        document.getElementById("user_removed").hidden = false;
+        document.getElementById("group_removed").hidden = true;
+    }
+    else{
+        document.getElementById("user_removed").hidden = true;
+        document.getElementById("group_removed").hidden = false;
+    }
 }
 </script>
 </head>
@@ -55,13 +66,24 @@ function showForm() {
 	<p>
 	<form id="add_user" action="/report/{{owner_name}}/{{report.id}}/" method="post">{% csrf_token %}
 	<select id="option" name="action" onchange="showForm()"><option name="add">Add</option><option name="remove">Remove</option></select>
-    <span id="add">a user to this report: <input name="user_permission" type="text"></span>
-    <span id="remove" hidden='true'>a user from this report: 
-    <select name="user_removed">
+    a 
+    <select id="entity" name="entity" onchange="showForm()"><option name="user">user</option><option name="group">group</option></select>
+    <span id="add"> to this report: <input name="user_permission" type="text"></span>
+    <span id="remove" hidden='true'> from this report: 
+    <span id="user_remove">
+    <select id="user_removed" name="user_removed" onchange="showForm()">
         {% for user in user_permissions %}
         <option name="{{user.id}}">{{user.username}}</option>
         {% endfor %}
     </select>
+    </span>
+    <span>
+    <select id="group_removed" name="group_removed" onchange="showForm()" hidden="true">
+        {% for group in group_permissions %}
+        <option name="{{group.id}}">{{group.name}}</option>
+        {% endfor %}
+    </select>
+    </span>
     </span>
     <input id="sub" type="submit" value="Add">
 	</form>
