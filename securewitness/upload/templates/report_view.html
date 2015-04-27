@@ -5,7 +5,21 @@
 	margin-left: 3em;
 }
 </style>
-
+<script>
+function showForm() {
+	var sel = document.getElementById("option").value;
+	if(sel == "Add"){
+		document.getElementById("add").hidden = false;
+		document.getElementById("remove").hidden = true;
+        document.getElementById("sub").value = "Add";
+	}
+	else{
+		document.getElementById("remove").hidden = false;
+		document.getElementById("add").hidden = true;
+        document.getElementById("sub").value = "Remove";
+	}
+}
+</script>
 </head>
 
 <body>
@@ -39,7 +53,16 @@
 	{% if editable %}
 	<p>
 	<form id="add_user" action="/report/{{user_name}}/{{report.id}}/" method="post">{% csrf_token %}
-	Give a user permission to see this report: <input name="user_permission" type="text"><input type="submit" value="Add">
+	<select id="option" name="action" onchange="showForm()"><option name="add">Add</option><option name="remove">Remove</option></select>
+    <span id="add">a user to this report: <input name="user_permission" type="text"></span>
+    <span id="remove" hidden='true'>a user from this report: 
+    <select name="user_removed">
+        {% for user in user_permissions %}
+        <option name="{{user.id}}">{{user.username}}</option>
+        {% endfor %}
+    </select>
+    </span>
+    <input id="sub" type="submit" value="Add">
 	</form>
 	</p>
 	{% endif %}

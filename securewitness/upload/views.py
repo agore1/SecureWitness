@@ -70,7 +70,7 @@ class see_report(ListView):
     def post(self, request, *args, **kwargs):
         postDict = request.POST.dict();
         rId = self.kwargs.get('report','');
-        if(list(postDict.keys()).count("user_permission") > 0):
+        if(postDict["user_permission"] != '' and postDict["action"] == "Add"):
             uName = postDict["user_permission"];
             uId = self.users.objects.filter(username=uName).all()[0].id;
             if(len(self.viewKeys.objects.filter(user_id=uId,id=rId).all()) < 1):
@@ -78,6 +78,11 @@ class see_report(ListView):
                 viewKey.user = self.users.objects.filter(username=uName).all()[0];
                 viewKey.report = self.report.objects.filter(id=rId).all()[0];
                 viewKey.save();
+        elif(postDict["action"] == "Remove"):
+            uName = postDict["user_removed"];
+            uId = self.users.objects.get(username=uName);
+            viewKey = self.viewKeys.objects.get(user_id=uId,report=rId);
+            viewKey.delete();
         return redirect("/report/"+request.user.username+"/"+rId);
     
     def get(self, request, *args, **kwargs):
@@ -116,6 +121,7 @@ class see_report(ListView):
         con['editable'] = False;
         if(con["user_name"] == self.request.user.username):
             con['editable'] = True;
+            con['user_permissions'] = self.users.objects.filter(can_view__report_id=self.kwargs.get('report',''));
         #con['folders'] = self.folder.objects.filter(author=self.request.user.username);
         #con['folder'] = self.kwargs.get('fold',None);
         return con
