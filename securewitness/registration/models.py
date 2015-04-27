@@ -16,6 +16,7 @@ from django.utils import six
 
 from registration.users import UserModel, UserModelString
 
+from django.contrib.auth.models import User
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -25,7 +26,14 @@ except ImportError:
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
 
-
+class Group(models.Model):
+    name = models.CharField(max_length=50, default="Default Group");
+    
+class in_group(models.Model):
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group, default=-1)
+    
+    
 class RegistrationManager(models.Manager):
     """
     Custom manager for the ``RegistrationProfile`` model.
