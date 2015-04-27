@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'upload',
     'registration',
+    'systemadmin',
 )
 
 ACCOUNT_ACTIVATION_DAYS = 3;
@@ -85,3 +86,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+AUTH_PROFILE_MODULE = 'systemadmin.UserProfile'

@@ -12,5 +12,6 @@ urlpatterns = patterns('',
                        # url(r'^standalone/', 'securewitness.views.standalone', name='login'),
                        url(r'^standalone/', include('standalone.urls')),
 					   url(r'^upload/', include('upload.urls')),
+                       url(r'^systemadmin/', include('systemadmin.urls')),
 
 )

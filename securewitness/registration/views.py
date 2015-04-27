@@ -30,12 +30,12 @@ class ReportListView(ListView):
 
 	model = Report;
 	folder = Folder;
-	
+
 	slug = None;
-	
+
 	def get_object(self, queryset=None):
 		return queryset.get(slug=self.slug);
-	
+
 	def get_queryset(self):
 		user = self.kwargs.get('slug','');#).all()[0];
 		folder = self.kwargs.get('fold','ROOT');
@@ -56,7 +56,7 @@ class ReportListView(ListView):
 		else:
 			object_list = [];
 		return object_list;
-	
+
 	def get_context_data(self, **kwargs):
 		con = super(ReportListView, self).get_context_data(**kwargs);
 		con['user_name'] = self.kwargs.get('slug',None);
@@ -68,7 +68,7 @@ class ReportListView(ListView):
 		con['folders'] = self.folder.objects.filter(author=self.request.user.username);
 		con['folder'] = self.kwargs.get('fold',None);
 		return con
-		
+
 	def post(self, request, *args, **kwargs):
 		if(request.POST["action_taken"] == "delete"):
 			for key in (list)(request.POST.keys()):
@@ -247,20 +247,20 @@ def login(request):
 		form = userForm(request.POST)
 		if form.is_valid():
 			user = authenticate(username=form.cleaned_data['username'],password=form.cleaned_data['password']);
-			if user is not None: 
+			if user is not None:
 				return(HttpResponse("Logged in"));
 			else:
 				return HttpResponse("Username/Password combination invalid.");
 	else:
 		c = {'form':userForm()};
 		return render(request, 'login.html',c);
-	
+
 def logout_view(request):
 	logout(request,{'next_page':'/accounts/login/'});
 	if request.user.is_authenticated():
 		return HttpResponse("wat");
 	return redirect("/accounts/login/");
-	
+
 def profile(request):
 	if request.user.is_authenticated():
 		c = {'user_name':request.user.username};
