@@ -50,5 +50,12 @@
 	No report with this ID exists.
 {% endfor %}
 
-
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+    <a href="/upload/search">Search for a report</a>
+	<br>
+	<a href="/accounts/{{ user_name|default:'Anonymous' }}/reports">My reports</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
 </body>

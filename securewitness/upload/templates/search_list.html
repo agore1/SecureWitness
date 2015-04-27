@@ -1,0 +1,59 @@
+<head>
+<style>
+.file_list{
+	margin-left: 5em;
+}
+
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.report_desc{
+	margin-left: 3em;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h1>Search Results</h1>
+
+<ul>
+{% for report in object_list %}
+    <li>
+        {% if editable %}
+        <input type="checkbox" name="check{{ report.id }}" value={{ report.id }}>
+        {% endif %}
+        <a href="/report/{{ report.author }}/{{ report.id }}">{{ report.pub_date|date }} - {{ report.short_desc }} - by {{ report.author }}</a>
+        <div class="report_desc">
+            {{ report.long_desc }}
+            <br>
+            Files:
+            {% for file in report.report_file_set.all %}
+            <li class="file_list">
+                {{ file.filename }}
+            </li>
+            {% empty %}
+            No files uploaded with the report.
+            {% endfor %}
+        </div>
+    </li>
+{% empty %}
+    <li>No results found.</li>
+{% endfor %}
+</ul>
+
+<br>
+<a href="/upload/report">Upload a report</a>
+<br>
+<a href="/upload/search">Search for a report</a>
+<br>
+<a href="/accounts/logout">Log out</a>
+
+
+
+
+	{{ debug }}
+</body>

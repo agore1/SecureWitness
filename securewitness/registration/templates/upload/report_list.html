@@ -29,7 +29,7 @@
 			{% if editable %}
 			<input type="checkbox" name="check{{ report.id }}" value={{ report.id }}>
 			{% endif %}
-			{{ report.pub_date|date }} - {{ report.short_desc }}
+			<a href="/report/{{ user_name }}/{{ report.id }}">{{ report.pub_date|date }} - {{ report.short_desc }}</a>
 			<div class="report_desc">
 				{{ report.long_desc }}
 				<br>

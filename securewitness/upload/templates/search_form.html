@@ -1,0 +1,44 @@
+<head>
+<style>
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.form_input{
+    margin-left: 5px;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<form enctype="multipart/form-data" action="" method="post">
+	{% csrf_token %}
+	<h2>Search</h2>
+    <div>
+    <p>
+    Author <select name="author"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="authorIn" class="form_input" type="text">
+    </p><p>
+    Tags (separated by spaces) <input name="tags" class="form_input" type="text">
+    </p><p>
+    Short Description <select name="short_desc"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="short_descIn" class="form_input" type="text">
+    </p><p>
+    Long Description <select name="long_desc"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="long_descIn" class="form_input" type="text">
+    </p><p>
+    Location <select name="location"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="locationIn" class="form_input" type="text">
+    </p>
+    </div>
+<div class="form">
+	<input type="submit" value="Submit">
+</div>
+</form>
+
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+	<a href="/accounts/{{ user_name|default:'Anonymous' }}/reports">My reports</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+</body>
