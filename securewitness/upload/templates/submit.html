@@ -10,7 +10,7 @@
 </head>
 
 <body>
-
+<span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
 <form enctype="multipart/form-data" action="report/" method="post">
 	<label for="submit-form"><b>Submit a report</b></label>
 	{% csrf_token %}

@@ -38,6 +38,7 @@ function showForm() {
 
 <body>
 
+    <span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
 <h1>{{ user_name|default:"Anonymous"}}'s reports
 {% if folder %}/{{ folder }} {% endif %}
 </h1>

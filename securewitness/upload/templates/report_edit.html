@@ -1,0 +1,44 @@
+<head>
+<style>
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.form_input{
+    margin-left: 5px;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<form enctype="multipart/form-data" action="" method="post">
+	{% csrf_token %}
+    <span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
+	<h2>Search</h2>
+    <div>
+    <p>
+    Short Description <input name="short_descIn" class="form_input" type="text" value='{{shortD}}'>
+    </p><p>
+    Long Description <input name="long_descIn" class="form_input" type="text" value='{{longD}}'>
+    </p><p>
+    Tags (separated by spaces) <input name="tags" class="form_input" type="text" value='{{tags}}'>
+    </p><p>
+    Location <input name="locationIn" class="form_input" type="text" value='{{loc}}'>
+    </p>
+    Private: <input name="privateIn" type="checkbox" {% if private %}checked{% endif %}>
+    </div>
+<div class="form">
+	<input type="submit" value="Submit">
+</div>
+</form>
+
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+	<a href="/accounts/{{ user_name|default:'Anonymous' }}/reports">My reports</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+</body>

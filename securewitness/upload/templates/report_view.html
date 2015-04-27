@@ -23,6 +23,7 @@ function showForm() {
 </head>
 
 <body>
+<span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
 {% for report in object_list %}
 	<h1>{{ report.short_desc }} </h1>
 	<p>
@@ -52,7 +53,7 @@ function showForm() {
 	<br>
 	{% if editable %}
 	<p>
-	<form id="add_user" action="/report/{{user_name}}/{{report.id}}/" method="post">{% csrf_token %}
+	<form id="add_user" action="/report/{{owner_name}}/{{report.id}}/" method="post">{% csrf_token %}
 	<select id="option" name="action" onchange="showForm()"><option name="add">Add</option><option name="remove">Remove</option></select>
     <span id="add">a user to this report: <input name="user_permission" type="text"></span>
     <span id="remove" hidden='true'>a user from this report: 
@@ -64,10 +65,16 @@ function showForm() {
     </span>
     <input id="sub" type="submit" value="Add">
 	</form>
-	</p>
+    
 	{% endif %}
 	{% endif %}
+    {% if editable %}
+	<br>
+    <br>
+    <a href="{{report.id}}/edit/">Edit this report</a>
+    {% endif %}
 	</p>
+    </p>
 	
 {% empty %}
 	No report with this ID exists.

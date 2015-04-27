@@ -22,6 +22,12 @@ class search(ListView):
     template_name = "search_list.html";
     reports = Report
     
+    def get_context_data(self, **kwargs):
+        con = super(search, self).get_context_data(**kwargs);
+        con["user_name"] = self.request.user.username;
+        
+        return con;
+    
     def get_queryset(self):
         object_list = self.reports.objects.filter(private=False);
         private_list = self.reports.objects.filter(can_view__user = self.request.user.id);
@@ -115,11 +121,12 @@ class see_report(ListView):
     
     def get_context_data(self, **kwargs):
         con = super(see_report, self).get_context_data(**kwargs);
-        con['user_name'] = self.kwargs.get('user',None);
+        con['owner_name'] = self.kwargs.get('user',None);
         #if self.request.method == "POST":
         #    con["user_name"] = "delete";
         con['editable'] = False;
-        if(con["user_name"] == self.request.user.username):
+        con["user_name"] = self.request.user.username;
+        if(con["owner_name"] == self.request.user.username):
             con['editable'] = True;
             con['user_permissions'] = self.users.objects.filter(can_view__report_id=self.kwargs.get('report',''));
         #con['folders'] = self.folder.objects.filter(author=self.request.user.username);
@@ -172,10 +179,46 @@ def report(request):
             return redirect("/accounts/"+request.user.username+"/reports");
     #If it's not a post, build the form
     else:
-        c = {'form':ReportForm()};
+        c = {'form':ReportForm(),"user_name":request.user.username};
         return render(request, 'submit.html',c);
     return HttpResponse(form.is_valid());
 
+def edit_form(request, report=None, user=None):
+    rep = Report.objects.get(id=report);
+    if(request.user.username != user):
+        return redirect("/report/"+user+"/"+report);
+    if request.method == 'POST':
+        postData = request.POST;
+        rep.short_desc = postData['short_descIn'];
+        rep.long_desc = postData['long_descIn'];
+        rep.location = postData['locationIn'];
+        if list(postData.keys()).count('privateIn') > 0:
+            rep.private = True;
+        else:
+            rep.private = False;
+        for i in rep.report_keyword_set.all():
+            i.delete();
+        tags = postData['tags'].split(" ");
+        for i in tags:
+            if len(i) <= 20 and i != "":
+                k = Report_keyword();
+                k.keyword = i.lstrip();
+                k.report = rep;
+                k.save();
+        rep.save();
+        return redirect("/report/"+user+"/"+report);
+    
+    c = {"user_name":request.user.username};
+    c['shortD'] = rep.short_desc;
+    tagList = "";
+    for i in rep.report_keyword_set.all():
+        tagList += i.keyword+" ";
+    c['tags'] = tagList;
+    c['longD'] = rep.long_desc;
+    c['loc'] = rep.location;
+    c['private'] = rep.private;
+    return render(request, 'report_edit.html',c);
+    
 def search_form(request):
     if request.method == 'POST':
         postData = request.POST;
@@ -186,7 +229,7 @@ def search_form(request):
         locQuery = "location__{0}-{1}".format(postData["location"],postData["locationIn"]);
         return(redirect("/upload/search="+authorQuery+"%"+tagQuery+"%"+shortQuery+"%"+longQuery+"%"+locQuery));
     
-    c = {};
+    c = {"user_name":request.user.username};
     
     return render(request, 'search_form.html',c);
     

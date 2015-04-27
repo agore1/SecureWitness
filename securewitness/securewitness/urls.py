@@ -6,6 +6,7 @@ urlpatterns = patterns('',
                        # Examples:
                        # url(r'^$', 'securewitness.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
+                       url(r'^report/(?P<user>[a-zA-Z0-9-]+)/(?P<report>[a-zA-Z0-9-]+)/edit/?',views.edit_form, name='report_edit'),
                        url(r'^report/(?P<user>[a-zA-Z0-9-]+)/(?P<report>[a-zA-Z0-9-]+)/?',views.see_report.as_view(), name='report'),
                        url(r'^admin/', include(admin.site.urls)),
                        url(r'^accounts/', include('registration.backends.simple.urls')),
