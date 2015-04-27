@@ -5,6 +5,30 @@
 }
 
 </style>
+
+
+</head>
+
+<body>
+<span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
+<form id="uploadForm" enctype="multipart/form-data" action="report/" method="post">
+	<label for="uploadForm"><b>Submit a report</b></label>
+	{% csrf_token %}
+	{{form.as_p}}
+    
+    
+    Report Files: 
+    <ul id="files">
+    <li class="form"><input id="file0" name="file0" type="file" ></li>
+    </ul>
+    <p id="addButton">
+    <button type="button" onclick="addFile()">Add additional file</button>
+    </p>
+<div class="form">
+	<input type="button" value="Submit" onclick="submitUpload()">
+</div>
+</form>
+
 <script>
 files = 0;
 
@@ -22,26 +46,14 @@ function addFile(){
     files += 1;
 }
 
+function submitUpload(){
+    date = document.getElementById("id_time").value;
+    if(date.match("[0-9]{4}\-[0-9]{2}\-[0-9]{2}")){
+        document.getElementById("uploadForm").submit();
+    }
+    else
+        alert("Event date is not formatted properly");
+}
+
 </script>
-
-</head>
-
-<body>
-<span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
-<form enctype="multipart/form-data" action="report/" method="post">
-	<label for="submit-form"><b>Submit a report</b></label>
-	{% csrf_token %}
-	{{form.as_p}}
-    
-    Report Files: 
-    <ul id="files">
-    <li class="form"><input id="file0" name="file0" type="file" ></li>
-    </ul>
-    <p id="addButton">
-    <button type="button" onclick="addFile()">Add additional file</button>
-    </p>
-<div class="form">
-	<input type="submit" value="Submit">
-</div>
-</form>
 </body>

@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 from registration.models import Group
 
 import os
@@ -48,6 +48,7 @@ class can_view(models.Model):
 #Model for the main report, what is there to say
 class Report(models.Model):
     pub_date = models.DateTimeField('date published');
+    event_date = models.DateTimeField('date of the event', default = timezone.now());
     author = models.CharField(max_length=200,default="Anonymous");
     short_desc = models.CharField(max_length = 50, default="None");
     long_desc = models.CharField(max_length=500, default = "None");
