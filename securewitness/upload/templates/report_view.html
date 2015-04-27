@@ -44,6 +44,11 @@ function showForm() {
 		Location: {{ report.location }}
 	{% endif %}
 	<p>
+    </p>
+	{% if report.event_date %}
+		Event date: {{ report.event_date.date }}
+	{% endif %}
+	<p>
 	Tags: <i>{% for key in report.report_keyword_set.all %}
 			{{key.keyword}}
 	{% empty %}

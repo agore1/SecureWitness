@@ -184,6 +184,7 @@ def report(request):
             r.long_desc = form.cleaned_data["long_des"];
             r.location = form.cleaned_data["location"];
             r.private = form.cleaned_data["private"];
+            r.event_date = form.cleaned_data["time"];
             r.in_folder = rootForm;
             r.save();
             
@@ -262,14 +263,15 @@ def search_form(request):
     
 #Form model
 class ReportForm(forms.Form):
-	short_des = forms.CharField(label="Short description", max_length = 50);
-	long_des = forms.CharField(label="Long description", max_length = 500);
-	location = forms.CharField(label="Location (optional)", max_length = 50,required=False);
-	private = forms.BooleanField(label="Private", required=False);
-	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
-	
-	#file = forms.FileField(label="Report file", required=False);
-	
+    short_des = forms.CharField(label="Short description", max_length = 50);
+    long_des = forms.CharField(label="Long description", max_length = 500);
+    time = forms.DateTimeField(label="Date of the event (Format YYYY-MM-DD, optional)", required=False);
+    location = forms.CharField(label="Location (optional)", max_length = 50,required=False);
+    private = forms.BooleanField(label="Private", required=False);
+    tags = forms.CharField(label="Keywords (separated with commas, optional)", max_length = 100, required=False);
+    
+    #file = forms.FileField(label="Report file", required=False);
+    
 #Unused file upload method, before the use of formModels.
 def handle_uploaded_file(f,name):
     with open(name+'.txt', 'wb+') as destination:
