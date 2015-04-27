@@ -46,4 +46,5 @@ urlpatterns = patterns('',
 					   url(r'^logout/$',views.logout_view,name="user_logout"),
 					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/reports/$',views.ReportListView.as_view(),name="report_list"),
 					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/(?P<fold>[a-zA-Z0-9\s]+)/reports/$',views.ReportListView.as_view(),name="report_list_folder"),
+                       url(r'^suspended',views.suspended,name="suspended"),
                        )

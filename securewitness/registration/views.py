@@ -249,9 +249,12 @@ def login_view(request):
         form = userForm(request.POST)
         if form.is_valid():
             user = authenticate(username=form.cleaned_data['username'],password=form.cleaned_data['password']);
-            if user is not None: 
-                login(request,user);
-                return redirect("/accounts/profile");
+            if user is not None:
+                if not user.profile.is_suspended:
+                    login(request,user);
+                    return redirect("/accounts/profile");
+                else:
+                    return suspended(request);
             else:
                 return redirect("/fasdfasdl");
     else:
@@ -266,10 +269,16 @@ def logout_view(request):
     
 def profile(request):
     if request.user.is_authenticated():
-        c = {'user_name':request.user.username};
-        return render(request, 'registration/profile.html',c);
+        if request.user.profile.is_suspended:
+            return suspended(request)
+        else:
+            c = {'user_name':request.user.username};
+            return render(request, 'registration/profile.html',c);
     return redirect("/accounts/login/");
 
+def suspended(request):
+    c = {'user_name':request.user.username};
+    return render(request, 'registration/suspended.html',c);
     
 class userForm(forms.Form):
     username = forms.CharField(label="Username", max_length = 50);

@@ -57,10 +57,11 @@ class UserView(ListView):
                 s = current.profile
                 s.is_admin = not s.is_admin
                 s.save()
-                return HttpResponse(s.is_admin)
         elif(request.POST["action_taken"] == "suspend_user"):
-                userID = request.user
-                userID.is_active = False
-                userID.save()
+            for i in check_list:
+                current = User.objects.get(username=i)
+                s = current.profile
+                s.is_suspended = not s.is_suspended
+                s.save()
         return redirect("/systemadmin/userlist/");
         #return HttpResponse(request.POST.items());
