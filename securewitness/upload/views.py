@@ -76,7 +76,10 @@ class see_report(ListView):
     def post(self, request, *args, **kwargs):
         postDict = request.POST.dict();
         rId = self.kwargs.get('report','');
+        
+        #If the user name field isn't empty, and the action selected is to add
         if(postDict["user_permission"] != '' and postDict["action"] == "Add"):
+            #Create can_view() entry that relates the user and report
             uName = postDict["user_permission"];
             uId = self.users.objects.filter(username=uName).all()[0].id;
             if(len(self.viewKeys.objects.filter(user_id=uId,id=rId).all()) < 1):
@@ -84,6 +87,7 @@ class see_report(ListView):
                 viewKey.user = self.users.objects.filter(username=uName).all()[0];
                 viewKey.report = self.report.objects.filter(id=rId).all()[0];
                 viewKey.save();
+        #if the action selected is to remove...
         elif(postDict["action"] == "Remove"):
             uName = postDict["user_removed"];
             uId = self.users.objects.get(username=uName);
@@ -172,10 +176,12 @@ def report(request):
                     k.save();
             
             #Create file object
-            f = Report_file();
-            f.report = r;
-            f.file = form.cleaned_data["file"];
-            f.save();
+            for file in list(request.FILES.keys()):
+                f = Report_file();
+                f.report = r;
+                #f.file = form.cleaned_data["file"];
+                f.file = request.FILES[file];
+                f.save();
             return redirect("/accounts/"+request.user.username+"/reports");
     #If it's not a post, build the form
     else:
@@ -241,7 +247,7 @@ class ReportForm(forms.Form):
 	private = forms.BooleanField(label="Private", required=False);
 	tags = forms.CharField(label="Keywords (separated with commas)", max_length = 100, required=False);
 	
-	file = forms.FileField(label="Report file", required=False);
+	#file = forms.FileField(label="Report file", required=False);
 	
 #Unused file upload method, before the use of formModels.
 def handle_uploaded_file(f,name):

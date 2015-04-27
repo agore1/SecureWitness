@@ -5,7 +5,24 @@
 }
 
 </style>
+<script>
+files = 0;
 
+function addFile(){
+    li = document.createElement("li");
+    input = document.createElement("input");
+    li.classList.add("form");
+    li.appendChild(input)
+    input.id = "file"+(files+1);
+    input.name = "file"+(files+1);
+    input.type = "file";
+    fileList = document.getElementById("files");
+    fileList.insertBefore(li,fileList.childNodes[0]);
+
+    files += 1;
+}
+
+</script>
 
 </head>
 
@@ -15,6 +32,14 @@
 	<label for="submit-form"><b>Submit a report</b></label>
 	{% csrf_token %}
 	{{form.as_p}}
+    
+    Report Files: 
+    <ul id="files">
+    <li class="form"><input id="file0" name="file0" type="file" ></li>
+    </ul>
+    <p id="addButton">
+    <button type="button" onclick="addFile()">Add additional file</button>
+    </p>
 <div class="form">
 	<input type="submit" value="Submit">
 </div>
