@@ -9,7 +9,6 @@ import sys
 
 @click.group()
 def main():
-
     click.echo('This is the standalone program.')
     # Program wide system variables for maintaining authentication
 
@@ -26,9 +25,7 @@ def secure(ctx):
     # Format form data for authentication
     payload = {'password': password, 'username': username, 'csrfmiddlewaretoken': login_response.cookies['csrftoken']}
     r = s.post('http://127.0.0.1:8000/accounts/login/', data=payload)
-    # TODO: Check for login success
     r = s.get('http://127.0.0.1:8000/standalone/verifylogin/' + username + '/')
-    # click.echo(r.text)
     if "True" not in r.text:
         click.echo("Sorry, there was an authentication error.")
         sys.exit()
@@ -52,13 +49,16 @@ def reports(ctx):
     click.echo(r.text)
 
 @secure.command()
-@click.argument('report_id', default=1, required=True)
+@click.argument('report_id', default=-1, required=True)
 @click.pass_context
 def view(ctx, report_id):
     """View the details of a report."""
-    session = ctx.obj['session']
-    r = session.get('http://127.0.0.1:8000/standalone/viewreport/' + ctx.obj['username'] + '/' + str(report_id) + '/')
-    click.echo(r.text)
+    if report_id > 0:
+        session = ctx.obj['session']
+        r = session.get('http://127.0.0.1:8000/standalone/viewreport/' + ctx.obj['username'] + '/' + str(report_id) + '/')
+        click.echo(r.text)
+    else:
+        click.echo("Incorrect syntax. Use: secwit secure view <report_id>")
 
 
 @secure.command()

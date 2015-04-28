@@ -1,22 +1,9 @@
-from django.shortcuts import render
-from django.contrib.auth.models import User
-from django.views.generic.list import ListView
-
 from django.shortcuts import redirect
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.contrib.auth import logout
-from django.utils import timezone
-
-from itertools import chain
 
 from django.contrib.auth.models import User
 
 from registration.models import in_group, Group
-from systemadmin.models import UserProfile
 
 
 # Create your views here.
@@ -53,12 +40,15 @@ class UserView(ListView):
             #new_group, created = Group.objects.get_or_create(name=group_name)
             new_group = Group(name=group_name)
             new_group.save()
+            str = group_name
             for i in check_list:
                 current = User.objects.get(username=i)
                 group_entry = in_group()
                 group_entry.user = current
                 group_entry.group = new_group
                 group_entry.save()
+                str = str + group_entry.user + group_entry.group
+
         elif(request.POST["action_taken"] == "make_admin"):
             for i in check_list:
                 current = User.objects.get(username=i)

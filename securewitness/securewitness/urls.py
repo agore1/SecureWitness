@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from upload import views
+from systemadmin.views import UserView
 
 urlpatterns = patterns('',
                        # Examples:
@@ -13,6 +14,7 @@ urlpatterns = patterns('',
                        # url(r'^standalone/', 'securewitness.views.standalone', name='login'),
                        url(r'^standalone/', include('standalone.urls')),
 					   url(r'^upload/', include('upload.urls')),
-                       url(r'^systemadmin/', include('systemadmin.urls')),
-
+                       url(r'^users/$',
+                           UserView.as_view(),
+                           name='userlist'),
 )

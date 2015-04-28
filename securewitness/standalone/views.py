@@ -6,6 +6,7 @@ from django.http import HttpResponse,StreamingHttpResponse
 from django.core.servers.basehttp import FileWrapper
 from upload.models import Report, can_view, Report_file
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 # Create your views here.
 
@@ -20,6 +21,7 @@ def format_report_short(report):
     report_details += 'Report id: {0} '.format(report.id)
     report_details += 'Short Description: {0} \nPublish date: {1} \nAuthor: {2}\n\n'.format(report.short_desc, report.pub_date, report.author)
     return report_details
+
 
 # View to return reports based on the username, passed in from url regex
 def reports(request, username=None):
@@ -40,6 +42,11 @@ def reports(request, username=None):
     shared_reports = Report.objects.filter(can_view__user_id=request.user.id)
     for report in shared_reports:
         reply += "Shared: " + format_report_short(report)
+
+    # Or shared to the requesting user's group
+    group_shared_reports = Report.objects.filter(can_view__group__in_group__user_id=request.user.id)
+    for report in group_shared_reports:
+        reply += "Group shared: " + format_report_short(report)
 
     return HttpResponse(reply)
 
@@ -65,6 +72,7 @@ def format_files(report_id):
     else:
         file_details += "No attached files."
     return file_details
+
 
 # View to return a detailed report view based on the username and report id, passed in from url regex
 def detailed_report(request, username=None, report_id=None):
@@ -95,6 +103,12 @@ def detailed_report(request, username=None, report_id=None):
         report = Report.objects.filter(can_view__report_id=repId, can_view__user_id=uId)[0]
         report_details += format_report_long(report)
         report_details += format_files(repId)
+    # Or if the current user is in a group that can view it
+    elif Report.objects.filter(can_view__group__in_group__user_id = uId).exists():
+        report_details = "You're in a group with access to this report:\n\n"
+        report = Report.objects.filter(can_view__group__in_group__user_id=uId)[0]
+        report_details += format_report_long(report)
+        report_details += format_files(repId)
     else:
         report_details = "Sorry, that report either does not exist or is not visible to you."
     return HttpResponse(report_details)
@@ -109,11 +123,12 @@ def can_access(username, report_id, user_id):
     owner = Report.objects.filter(id=report_id, private=True, author=username).exists()
     # Or the current user has been granted permission to view it
     shared = Report.objects.filter(can_view__report_id=report_id, can_view__user_id=user_id).exists()
-    canview = public or owner or shared
+    # Or the current user is in a group with permission to view it
+    groupshared = User.objects.filter(in_group__group__can_view__report_id=report_id, id=user_id).exists()
+    # Reports.objects.filter((can_view__group__in_group__user_id = self.request.user.id))
+    canview = public or owner or shared or groupshared
     return canview
 
-
-    pass
 
 def download_report_file(request,username=None,report_id=None,fileN=0):
     username = None

@@ -102,7 +102,7 @@ class ReportListView(ListView):
         user = self.kwargs.get('slug','');#).all()[0];
         folder = self.kwargs.get('fold','ROOT');
         if(user != ''):
-            if(user != self.request.user.username):
+            if(user != self.request.user.username and not self.request.user.profile.is_admin):
                 object_list = self.model.objects.filter(author=user,private=False);
                 private_list = self.model.objects.filter(author=user,can_view__user_id = self.request.user.id);
                 object_list = chain(private_list,object_list);

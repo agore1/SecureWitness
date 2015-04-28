@@ -32,12 +32,12 @@ function CheckColors(val){
 <ul>
     {% for users in object_list.all %}
 		<li>
-        {% if user.profile.is_admin %}<input type="checkbox" name="checks[]" value="{{ users.username }}" form="action">{% endif %}
-        {{ users.username }} <br> Admin:{{ users.profile.is_admin }} <br> Suspended:{{ users.profile.is_suspended }} <br> <br>
+        {% if user.profile.is_admin or user.is_staff %}<input type="checkbox" name="checks[]" value="{{ users.username }}" form="action">{% endif %}
+        <a href="/accounts/{{ users.username }}/reports/">{{ users.username }}</a> <br> Admin:{{ users.profile.is_admin }} <br> Suspended:{{ users.profile.is_suspended }} <br> <br>
 		</li>
 	{% endfor %}
 	</ul>
-    {% if user.profile.is_admin %}
+    {% if user.profile.is_admin or user.is_staff%}
         <select id="options" name="action_taken" form="action" onchange='CheckColors(this.value)'>
             <option>Select an Action</option>
 		    <option value="add_group">Create Group</option>
