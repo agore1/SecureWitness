@@ -1,0 +1,87 @@
+<head>
+<style>
+.file_list{
+	margin-left: 5em;
+}
+
+.folder{
+	background-color: #EEEEFF;
+}
+
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+.report_desc{
+	margin-left: 3em;
+}
+</style>
+
+<script>
+function showForm() {
+	var sel = document.getElementById("option").value;
+	if(sel == "Add"){
+		document.getElementById("add_user").hidden = false;
+		document.getElementById("add_user_select").hidden = true;
+	}
+	else{
+		document.getElementById("add_user").hidden = true;
+		document.getElementById("add_user_select").hidden = false;
+	}
+}
+</script>
+</head>
+
+<body>
+
+    <span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
+<h1>{{ group_name|default:"Anonymous"}}'s users
+{% if folder %}/{{ folder }} {% endif %}
+</h1>
+
+<form id="action" action="/accounts/groups/{{ gId }}/" method="post">{% csrf_token %}
+	
+	
+	<ul>
+	{% for userOb in object_list %}
+		<li>
+			{% if admin %}
+			<input type="checkbox" name="checkR{{ userOb.id }}" value={{ userOb.id }}>
+			{% endif %}
+			<a href="/accounts/{{ userOb.username }}/reports">{{ userOb.username }}<a/>
+			
+		</li>
+	{% empty %}
+		<li>No users are in this group</li>
+	{% endfor %}
+	</ul>
+	{% if editable %}
+	Add user to this group: <input type="text" id="add_user" name="add_user">
+    <br>
+    <input type="submit" value="Action">
+	{% endif %}
+    {% if admin %}
+    <select id="option" name="action" onchange="showForm()"><option name="add">Add</option><option name="remove">Remove</option></select>
+    a user: 
+    <select id="add_user_select" name="remove_user"  hidden="true">
+        {% for user in user_permissions %}
+        <option name="{{user.id}}">{{user.username}}</option>
+        {% endfor %}
+    </select>
+    <input type="text" id="add_user" name="add_user">
+    <br>
+    <input type="submit" value="Action">
+    {% endif %}
+</form>
+
+
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+    <a href="/upload/search">Search for a report</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+	
+	
+	{{ debug }}	
+</body>
