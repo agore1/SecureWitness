@@ -108,7 +108,7 @@ def detailed_report(request, username=None, report_id=None):
         report_details = "You're in a group with access to this report:\n\n"
         report = Report.objects.filter(can_view__group__in_group__user_id=uId)[0]
         report_details += format_report_long(report)
-        report_details += format_files(repId)   
+        report_details += format_files(repId)
     else:
         report_details = "Sorry, that report either does not exist or is not visible to you."
     return HttpResponse(report_details)
