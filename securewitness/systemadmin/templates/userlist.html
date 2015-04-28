@@ -12,44 +12,43 @@
 
 </style>
 
-<script>
-function showForm() {
-	var sel = document.getElementById("options").value;
-	if(sel == "mk_folder"){
-		document.getElementById("folder_name").hidden = false;
-		document.getElementById("folders").hidden = true;
-	}
-	else if(sel == "move"){
-		document.getElementById("folder_name").hidden = true;
-		document.getElementById("folders").hidden = false;
-	}
-	else{
-		document.getElementById("folder_name").hidden = true;
-		document.getElementById("folders").hidden = true;
-	}
+<script type="text/javascript">
+function CheckColors(val){
+ var element=document.getElementById('color');
+ if(val=='add_group')
+   element.style.display='block';
+ else
+   element.style.display='none';
 }
+
 </script>
 </head>
 
 <body>
-
+{% if user.is_authenticated %}
 <h1>All Users in System</h1>
 
 <form id="action" method="post">{% csrf_token %}
 <ul>
-    {% for user in object_list.all %}
+    {% for users in object_list.all %}
 		<li>
-        <input type="checkbox" name="checks[]" value="{{ user.username }}" form="action">
-        {{ user.username }} <br> Admin:{{ user.profile.is_admin }} <br> Suspended:{{ user.profile.is_suspended }} <br> <br>
+        {% if user.profile.is_admin %}<input type="checkbox" name="checks[]" value="{{ users.username }}" form="action">{% endif %}
+        {{ users.username }} <br> Admin:{{ users.profile.is_admin }} <br> Suspended:{{ users.profile.is_suspended }} <br> <br>
 		</li>
 	{% endfor %}
 	</ul>
-        <select id="options" name="action_taken" form="action">
-		    <option value="add_group">Add/Remove from Group</option>
+    {% if user.profile.is_admin %}
+        <select id="options" name="action_taken" form="action" onchange='CheckColors(this.value)'>
+            <option>Select an Action</option>
+		    <option value="add_group">Create Group</option>
 		    <option value="make_admin">Make Admin</option>
 		    <option value="suspend_user">Suspend User</option>
         </select>
+    <input type="text" name="color" id="color" form="action" style='display:none;'/>
     <input type="submit" form="action" value="Action" onclick="this.form.submit()">
+    {% endif %}
 </form>
-
+{% else %}
+<h1>Please log in to view Users</h1>
 </body>
+{% endif %}

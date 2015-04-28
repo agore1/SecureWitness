@@ -15,6 +15,7 @@ from itertools import chain
 
 from django.contrib.auth.models import User
 
+from registration.models import in_group, Group
 from systemadmin.models import UserProfile
 
 
@@ -47,10 +48,17 @@ class UserView(ListView):
 
     def post(self, request, *args, **kwargs):
         check_list = request.POST.getlist('checks[]')
-
         if(request.POST["action_taken"] == "add_group"):
-                userID = request.user.username
-
+            group_name = request.POST.get('color')
+            #new_group, created = Group.objects.get_or_create(name=group_name)
+            new_group = Group(name=group_name)
+            new_group.save()
+            for i in check_list:
+                current = User.objects.get(username=i)
+                group_entry = in_group()
+                group_entry.user = current
+                group_entry.group = new_group
+                group_entry.save()
         elif(request.POST["action_taken"] == "make_admin"):
             for i in check_list:
                 current = User.objects.get(username=i)
