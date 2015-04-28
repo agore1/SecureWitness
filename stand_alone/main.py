@@ -7,15 +7,15 @@ from simplecrypt import encrypt, decrypt
 
 
 @click.group()
-def login():
-    pass
-    # click.echo('This is the standalone program.')
+def main():
+
+    click.echo('This is the standalone program.')
     # Program wide system variables for maintaining authentication
 
 
-@click.group()
+@main.group()
 @click.pass_context   # This enables passing a session context variable for staying logged in.
-def main(ctx):
+def secure(ctx):
     """Authenticate with the Secure Witness server."""
     username = click.prompt('Please enter your username', type=str)
     password = click.prompt('Please enter your password', hide_input=True, type=str)
@@ -33,7 +33,7 @@ def main(ctx):
     ctx.obj['session'] = s
     ctx.obj['username'] = username
 
-@main.command()
+@secure.command()
 @click.pass_context
 def reports(ctx):
     """List all reports that are visible to the current user."""
@@ -43,7 +43,7 @@ def reports(ctx):
     r = session.get('http://127.0.0.1:8000/standalone/reports/' + ctx.obj['username'] + '/')
     click.echo(r.text)
 
-@main.command()
+@secure.command()
 @click.argument('report_id', default=1, required=True)
 @click.pass_context
 def view(ctx, report_id):
@@ -53,7 +53,7 @@ def view(ctx, report_id):
     click.echo(r.text)
 
 
-@main.command()
+@secure.command()
 @click.argument('report_id', default=-1, required=True)
 @click.argument('file_num', default=-1, required=True)
 @click.pass_context
@@ -76,11 +76,11 @@ def download(ctx, report_id, file_num):
 
 
 
-@login.command()
+@main.command()
 def dec():
     """Decrypt an encrypted file."""
     filename = click.prompt('Please enter the filename to decrypt', type=str)
-    password = click.prompt('Please enter your password', hide_input=True, type=str)
+    password = click.prompt('Please enter the password (key) to decrypt the file with: ', hide_input=True, type=str)
     # Open the encrypted file and decrypt the contents
     with open(filename, 'rb') as encrypted:
         plaintext_bytes = decrypt(password, encrypted.read())
@@ -90,11 +90,11 @@ def dec():
     click.echo('Finished decrypting the file.')
 
 
-@login.command()
+@main.command()
 def enc():
     """Encrypt a file."""
     filename = click.prompt('Please enter the filename to be encrypted', type=str)
-    password = click.prompt('Please enter your password', hide_input=True, type=str)
+    password = click.prompt('Please enter a password (key) to encrypt the file with: ', hide_input=True, type=str)
     # Open the file and encrypt it
     with open(filename, 'rb')as unencrypted:
         ciphertext_bytes = encrypt(password, unencrypted.read())
@@ -102,12 +102,4 @@ def enc():
         with open(filename + '.enc', 'wb') as encrypted:
             encrypted.write(ciphertext_bytes)
     click.echo('Finished encrypting out file.')
-
-
-@login.command()
-def listreports():
-    """List all reports that are visible to the logged-in user"""
-    click.echo(s.cookies)
-    # r = s.get('http://127.0.0.1:8000/accounts/profile/')
-    # click.echo(r.text)
 
