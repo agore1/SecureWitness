@@ -1,0 +1,28 @@
+<head>
+<style>
+.form{
+	padding: 5px 0px 5px 0px;
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<div>
+	Your Account Has been suspended, please contact an Administrator for more information.
+	<p>
+	User: {{ user_name|default:"Anonymous?! WHAT?!"}}
+	</p>
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+    <a href="/upload/search">Search for a report</a>
+	<br>
+	<a href="/accounts/{{ user_name|default:'Anonymous' }}/reports">My reports</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
+</div>
+</body>
