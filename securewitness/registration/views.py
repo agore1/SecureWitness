@@ -18,12 +18,74 @@ from django.contrib.auth.models import User
 
 from registration import signals
 from registration.forms import RegistrationForm, loginForm
+from registration.models import Group,in_group
 from upload.models import Report, delete_report, Folder, delete_folder
 
 #def ReportEdit(request):
 #    return render(request, 'submit.html', {});
     #return redirect("/accounts/"+request.user.username+"/reports");
 
+class groupView(ListView):
+
+    template_name = "group.html";
+    users = User;
+    groups = Group;
+    groupKeys = in_group;
+    
+    def post(self, request, *args, **kwargs):
+        uName = request.POST["add_user"];
+        gId = self.kwargs.get('group','');
+        userQuery = self.users.objects.filter(username=uName);
+        if userQuery and not self.request.user.profile.is_admin:
+            uId = userQuery.all()[0].id;
+            if(len(self.groupKeys.objects.filter(user=uId,group=gId).all()) < 1):
+                groupKey = in_group();
+                groupKey.user = self.users.objects.filter(username=uName).all()[0];
+                groupKey.group = self.groups.objects.get(id=gId);
+                groupKey.save();
+        elif(self.request.user.profile.is_admin):
+            
+            if(request.POST["action"] == "Add"):
+                if userQuery:
+                    uId = userQuery.all()[0].id;
+                    if(len(self.groupKeys.objects.filter(user=uId,group=gId).all()) < 1):
+                        groupKey = in_group();
+                        groupKey.user = self.users.objects.filter(username=uName).all()[0];
+                        groupKey.group = self.groups.objects.get(id=gId);
+                        groupKey.save();
+            else:
+                user = self.users.objects.get(username=request.POST["remove_user"]);
+                gKey = self.groupKeys.objects.filter(user=user.id,group=gId)
+                
+                if(len(gKey.all()) > 0):
+                    groupKey = gKey.all()[0];
+                    groupKey.delete();
+        
+        return super(groupView,self).get(request, *args,**kwargs);
+    
+    def get_context_data(self, **kwargs):
+        gId = self.kwargs.get('group','');
+        con = super(groupView, self).get_context_data(**kwargs);
+        thisGroup = self.groups.objects.get(id=gId);
+        con["group_name"] = thisGroup.name;
+        con["gId"] = gId;
+        con["user_name"] = self.request.user.username;
+        
+        if(self.groupKeys.objects.filter(user=self.request.user,group=thisGroup)):
+            con["editable"] = True;
+        if(self.request.user.profile.is_admin):
+            con["admin"] = True;
+            con["editable"] = False;
+            con["user_permissions"] = self.users.objects.filter(in_group__group_id=gId);
+            
+        return con;
+    
+    def get_queryset(self):
+        gId = self.kwargs.get('group','')
+        object_list = self.users.objects.filter(in_group__group_id=int(gId));
+        
+        return object_list;
+    
 class ReportListView(ListView):
 
     template_name = "report_list.html";
