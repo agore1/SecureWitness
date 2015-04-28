@@ -2,6 +2,7 @@ __author__ = 'austin'
 import click
 import requests
 from simplecrypt import encrypt, decrypt
+import sys
 
 # s = requests.Session()  # Session variable keeps cookies intact for authentication
 
@@ -26,6 +27,13 @@ def secure(ctx):
     payload = {'password': password, 'username': username, 'csrfmiddlewaretoken': login_response.cookies['csrftoken']}
     r = s.post('http://127.0.0.1:8000/accounts/login/', data=payload)
     # TODO: Check for login success
+    r = s.get('http://127.0.0.1:8000/standalone/verifylogin/' + username + '/')
+    # click.echo(r.text)
+    if "True" not in r.text:
+        click.echo("Sorry, there was an authentication error.")
+        sys.exit()
+
+    # If r.contains True, you're logged in, else there was an error, exit
     click.echo("You are logged in now.")
 
     # Create a dictionary to store variables to be passed to reports method

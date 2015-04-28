@@ -134,3 +134,11 @@ def download_report_file(request,username=None,report_id=None,fileN=0):
     response = StreamingHttpResponse(FileWrapper(open(filePath,mode='rb'),chunk_size),content_type=mimetypes.guess_type(filePath)[0])
     response['Content-Disposition'] = 'attachment; filename=%s' % fileName
     return response
+
+
+def verifylogin(request, username=None):
+    """Check to make sure the user successfully logged into the system."""
+    if not request.user.is_authenticated() or request.user.username != username:
+        return HttpResponse("False")
+    else:
+        return HttpResponse("True")
