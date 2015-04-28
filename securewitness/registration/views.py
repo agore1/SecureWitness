@@ -334,7 +334,7 @@ def profile(request):
         if request.user.profile.is_suspended:
             return suspended(request)
         else:
-            c = {'user_name':request.user.username};
+            c = {'user_name':request.user.username,'groups':Group.objects.filter(in_group__user_id=request.user.id)};
             return render(request, 'registration/profile.html',c);
     return redirect("/accounts/login/");
 

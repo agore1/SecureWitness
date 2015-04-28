@@ -12,7 +12,14 @@
 <body>
 
 <div>
-	USER INFO HERE
+	Groups: 
+    <ul>
+        {% for g in groups %}
+        <li><a href="/accounts/groups/{{g.id}}">{{g.name}}</a></li>
+        {% empty %}
+        None
+        {% endfor %}
+    </ul> 
 	<p>
 	User: {{ user_name|default:"Anonymous?! WHAT?!"}}
 	</p>
