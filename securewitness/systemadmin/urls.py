@@ -2,6 +2,8 @@ from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.views.generic.base import TemplateView
+
+from systemadmin import views
 from systemadmin.views import UserView
 
 urlpatterns = patterns('',

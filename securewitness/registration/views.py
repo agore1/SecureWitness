@@ -256,7 +256,7 @@ def login_view(request):
                 else:
                     return suspended(request);
             else:
-                return redirect("/accounts/login/");
+                return redirect("/accounts/login");
     else:
         c = {'form':userForm()};
         return render(request, 'login.html',c);

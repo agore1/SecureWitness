@@ -1,5 +1,6 @@
 import os
 import mimetypes
+import re
 
 from itertools import chain
 
@@ -13,6 +14,7 @@ from django.core.files.storage import default_storage, File
 from django.core.servers.basehttp import FileWrapper
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.db.models.query import EmptyQuerySet
 from registration.models import Group
 #from reports import formModels
 from django import forms
@@ -22,6 +24,7 @@ class search(ListView):
     pDict = {};
     template_name = "search_list.html";
     reports = Report
+    queryList = [];
     
     def get_context_data(self, **kwargs):
         con = super(search, self).get_context_data(**kwargs);
@@ -30,41 +33,53 @@ class search(ListView):
         return con;
     
     def get_queryset(self):
-        object_list = self.reports.objects.filter(private=False);
-        private_list = self.reports.objects.filter(Q(can_view__user = self.request.user.id)|Q(can_view__group__in_group__user_id = self.request.user.id));
-        filterArgs = {};
-        for k in list(self.pDict.keys()):
-            if self.pDict[k] != '':
-                if k == "tags":
-                    tags = self.pDict[k].split("+");
-                    #object_list = object_list.filter(report_keyword__keyword__in=tags);
-                    #private_list = private_list.filter(report_keyword__keyword__in=tags);
-                    filterArgs['report_keyword__keyword__in'] = tags;
-                else:
-                    '''
-                    filterArgs = 
-                    exec("object_list = object_list.filter("+k+"=self.pDict[k])");
-                    exec("private_list = private_list.filter("+k+"=self.pDict[k])");
-                    return(object_list);
-                    '''
-                    
-                    filterArgs[k] = self.pDict[k].replace('+',' ');
-        #return(filterArgs.keys())
-        object_list = object_list.filter(**filterArgs);
-        private_list = private_list.filter(**filterArgs);
-        object_list = chain(private_list,object_list);
         
-        return object_list;
+    
+        final_list = self.reports.objects.none();
+        
+        for pDict in self.queryList:
+            object_list = self.reports.objects.filter(private=False);
+            private_list = self.reports.objects.filter(Q(can_view__user = self.request.user.id)|Q(can_view__group__in_group__user_id = self.request.user.id)|Q(author=self.request.user.username));
+            filterArgs = {};
+            for k in list(pDict.keys()):
+                if pDict[k] != '':
+                    if k == "tags":
+                        tags = pDict[k].split("+");
+                        #object_list = object_list.filter(report_keyword__keyword__in=tags);
+                        #private_list = private_list.filter(report_keyword__keyword__in=tags);
+                        filterArgs['report_keyword__keyword__in'] = tags;
+                    else:
+                        '''
+                        filterArgs = 
+                        exec("object_list = object_list.filter("+k+"=self.pDict[k])");
+                        exec("private_list = private_list.filter("+k+"=self.pDict[k])");
+                        return(object_list);
+                        '''
+                        
+                        filterArgs[k] = pDict[k].replace('+',' ');
+            #return(filterArgs.keys())
+            object_list = object_list.filter(**filterArgs);
+            private_list = private_list.filter(**filterArgs);
+            object_list = list(chain(private_list,object_list));
+            final_list = set(chain(final_list,object_list));
+        
+        return final_list;
     
     def get(self, request, *args, **kwargs):
+        self.queryList = [];
         s = self.kwargs.get('slug','');
-        params = s.split("%");
-        self.pDict = {};
-        for p in params:
-            keyVal = p.split("-");
-            self.pDict[keyVal[0]] = keyVal[1];
+        queries = s.split("OR");
+        
+        for query in queries:
+            if(query != ""):
+                params = query.split("%");
+                pDict = {};
+                for p in params:
+                    if p != '':
+                        keyVal = p.split("-");
+                        pDict[keyVal[0]] = keyVal[1];
+                self.queryList.append(pDict);
         #o_list = self.get_queryset()
-        #return HttpResponse(o_list);
         return super(search, self).get(request, *args, **kwargs);
 
 class see_report(ListView):
@@ -137,7 +152,7 @@ class see_report(ListView):
         if(owner == self.request.user.username):
             object_list = self.report.objects.filter(author=owner,id=repId);
         else:
-            if(self.users.objects.filter(can_view__report_id=repId,id=uId).exists()):
+            if(self.users.objects.filter(Q(can_view__report_id=repId,id=uId) | Q(in_group__group__can_view__report_id=repId,id=uId)).exists()):
                 object_list = self.report.objects.filter(author=owner,id=repId);
             else:
                 object_list = self.report.objects.filter(author=owner,id=repId,private=False);
@@ -216,17 +231,17 @@ def edit_form(request, report=None, user=None):
     if(request.user.username != user):
         return redirect("/report/"+user+"/"+report);
     if request.method == 'POST':
-        postData = request.POST;
-        rep.short_desc = postData['short_descIn'];
-        rep.long_desc = postData['long_descIn'];
-        rep.location = postData['locationIn'];
-        if list(postData.keys()).count('privateIn') > 0:
+        query = request.POST;
+        rep.short_desc = query['short_descIn'];
+        rep.long_desc = query['long_descIn'];
+        rep.location = query['locationIn'];
+        if list(query.keys()).count('privateIn') > 0:
             rep.private = True;
         else:
             rep.private = False;
         for i in rep.report_keyword_set.all():
             i.delete();
-        tags = postData['tags'].split(" ");
+        tags = query['tags'].split(" ");
         for i in tags:
             if len(i) <= 20 and i != "":
                 k = Report_keyword();
@@ -249,13 +264,40 @@ def edit_form(request, report=None, user=None):
     
 def search_form(request):
     if request.method == 'POST':
-        postData = request.POST;
-        authorQuery = "author__{0}-{1}".format(postData["author"],postData["authorIn"]);
-        tagQuery = "tags-{0}".format(postData["tags"].replace(" ","+"));
-        shortQuery = "short_desc__{0}-{1}".format(postData["short_desc"],postData["short_descIn"]);
-        longQuery = "long_desc__{0}-{1}".format(postData["long_desc"],postData["long_descIn"]);
-        locQuery = "location__{0}-{1}".format(postData["location"],postData["locationIn"]);
-        return(redirect("/upload/search="+authorQuery+"%"+tagQuery+"%"+shortQuery+"%"+longQuery+"%"+locQuery));
+        query = request.POST;
+        querySets = [];
+        for k in list(request.POST.keys()):
+            regex = re.search("\d+",k)
+            if(regex != None):
+                queryNumber = int(re.search("\d+",k).group(0));
+                if(queryNumber >= len(querySets)):
+                    while(len(querySets) <= queryNumber):
+                        querySets.append({});
+                querySets[queryNumber][re.search("\D+",k).group(0)] = request.POST[k];
+
+        finalQuery = "";
+        #return HttpResponse(querySets)
+        for query in querySets:
+            authorQuery = "author__{0}-{1}%".format(query["author"],query["authorIn"]);
+            if query["authorIn"] == "":
+                authorQuery = "";
+            tagQuery = "tags-{0}%".format(query["tags"].replace(" ","+"));
+            if query["tags"] == "":
+                tagQuery = "";
+            shortQuery = "short_desc__{0}-{1}%".format(query["short_desc"],query["short_descIn"]);
+            if query["short_descIn"] == "":
+                shortQuery = "";
+            longQuery = "long_desc__{0}-{1}%".format(query["long_desc"],query["long_descIn"]);
+            if query["long_descIn"] == "":
+                longQuery = "";
+            locQuery = "location__{0}-{1}".format(query["location"],query["locationIn"]);
+            if query["locationIn"] == "":
+                locQuery = "";
+            if(finalQuery != ""):
+                finalQuery += "OR";
+            finalQuery += authorQuery+tagQuery+shortQuery+longQuery+locQuery;
+        
+        return(redirect("/upload/search="+finalQuery));
     
     c = {"user_name":request.user.username};
     
