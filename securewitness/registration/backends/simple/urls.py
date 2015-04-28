@@ -23,7 +23,7 @@ from django.conf.urls import url
 from django.views.generic.base import TemplateView
 from registration import views
 
-from django.contrib.auth.views import logout
+from django.contrib.auth import views as auth_views
 
 from registration.backends.simple.views import RegistrationView
 
@@ -42,7 +42,10 @@ urlpatterns = patterns('',
 					   
 
 					   url(r'^profile',views.profile,name="user_profile"),
-                       url(r'^login/$',views.login_view,name="user_login"),
+                       url(r'^login/$',
+                           auth_views.login,
+                           {'template_name': 'login.html'},
+                           name='auth_login'),
 					   url(r'^logout/$',views.logout_view,name="user_logout"),
 					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/reports/$',views.ReportListView.as_view(),name="report_list"),
 					   url(r'^(?P<slug>[a-zA-Z0-9-]+)/(?P<fold>[a-zA-Z0-9\s]+)/reports/$',views.ReportListView.as_view(),name="report_list_folder"),
