@@ -123,6 +123,6 @@ class RegistrationFormNoFreeEmail(RegistrationForm):
 
 		
 class loginForm():
-	username = forms.CharField(label="Username:", max_length=30);
-	password = forms.CharField(label="Password:");
-	
+    username = forms.CharField(label="Username:", max_length=30);
+    password = forms.CharField(widget=forms.PasswordInput,
+                               label=_("Password"))
