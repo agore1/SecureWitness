@@ -4,7 +4,10 @@ from django.db.models.signals import post_save
      
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    is_admin = models.BooleanField(default=False)
+    if user.username is "admin":
+        is_admin = models.BooleanField(default=True)
+    else:
+        is_admin = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=False)
 #    def get_or_create_user_profile(user):
  #       profile = None
