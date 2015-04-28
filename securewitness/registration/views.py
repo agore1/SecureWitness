@@ -253,7 +253,7 @@ def login_view(request):
                 login(request,user);
                 return redirect("/accounts/profile");
             else:
-                return redirect("/fasdfasdl");
+                return redirect("/accounts/login");
     else:
         c = {'form':userForm()};
         return render(request, 'login.html',c);

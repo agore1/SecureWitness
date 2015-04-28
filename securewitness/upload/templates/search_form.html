@@ -9,30 +9,63 @@
 }
 </style>
 
+<script>
+nextQuery = 1;
+
+function addQuery(){
+    query = document.getElementById("query");
+    form = document.getElementById("search_form");
+    newQuery = query.cloneNode(true);
+    queryChildren = newQuery.childNodes;
+    console.log(newQuery.childNodes);
+    for( p in queryChildren ){
+        if(queryChildren[p].nodeType == 1){
+            subChildren = queryChildren[p];
+            for( e in subChildren.childNodes){
+                if(subChildren.childNodes[e].nodeType == 1){
+                    console.log(subChildren.childNodes[e].name);
+                    subChildren.childNodes[e].name = subChildren.childNodes[e].name.match("([a-z]|_|[A-Z])+")[0]+nextQuery;
+                }
+            }
+        }
+    }
+    p = document.createElement("p")
+    orTxt = document.createTextNode("OR")
+    p.appendChild(orTxt)
+    buttons = document.getElementById("buttons")
+    search_form.insertBefore(p,buttons);
+    search_form.insertBefore(newQuery,buttons)
+    
+    nextQuery += 1;
+}
+</script>
+
 
 </head>
 
 <body>
 <span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
-<form enctype="multipart/form-data" action="" method="post">
+<form id="search_form" enctype="multipart/form-data" action="" method="post">
 	{% csrf_token %}
 	<h2>Search</h2>
-    <div>
+    <div id="query">
     <p>
-    Author <select name="author"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="authorIn" class="form_input" type="text">
+    Author <select name="author0"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="authorIn0" class="form_input" type="text">
     </p><p>
-    Tags (separated by spaces) <input name="tags" class="form_input" type="text">
+    Tags (separated by spaces) <input name="tags0" class="form_input" type="text">
     </p><p>
-    Short Description <select name="short_desc"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="short_descIn" class="form_input" type="text">
+    Short Description <select name="short_desc0"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="short_descIn0" class="form_input" type="text">
     </p><p>
-    Long Description <select name="long_desc"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="long_descIn" class="form_input" type="text">
+    Long Description <select name="long_desc0"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="long_descIn0" class="form_input" type="text">
     </p><p>
-    Location <select name="location"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="locationIn" class="form_input" type="text">
+    Location <select name="location0"><option value="icontains">contains</option><option value="iexact">is</option></select> <input name="locationIn0" class="form_input" type="text">
     </p>
     </div>
-<div class="form">
+<div id="buttons" class="form">
+    <button type="button" onclick="addQuery()">Add a new OR query</button>
 	<input type="submit" value="Submit">
 </div>
+
 </form>
 
 	<br>
