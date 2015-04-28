@@ -5,10 +5,36 @@
 	margin-left: 3em;
 }
 </style>
-
+<script>
+function showForm() {
+	var sel = document.getElementById("option").value;
+    var entity = document.getElementById("entity").value;
+	if(sel == "Add"){
+		document.getElementById("add").hidden = false;
+		document.getElementById("remove").hidden = true;
+        document.getElementById("sub").value = "Add";
+        
+	}
+	else{
+		document.getElementById("remove").hidden = false;
+		document.getElementById("add").hidden = true;
+        document.getElementById("sub").value = "Remove";
+	}
+    
+    if(entity == "user"){
+        document.getElementById("user_removed").hidden = false;
+        document.getElementById("group_removed").hidden = true;
+    }
+    else{
+        document.getElementById("user_removed").hidden = true;
+        document.getElementById("group_removed").hidden = false;
+    }
+}
+</script>
 </head>
 
 <body>
+<span style="position:absolute;right:5px">Hello, <a href="/accounts/profile">{{user_name}}</a></span>
 {% for report in object_list %}
 	<h1>{{ report.short_desc }} </h1>
 	<p>
@@ -16,6 +42,11 @@
 	</p>
 	{% if report.location %}
 		Location: {{ report.location }}
+	{% endif %}
+	<p>
+    </p>
+	{% if report.event_date %}
+		Event date: {{ report.event_date.date }}
 	{% endif %}
 	<p>
 	Tags: <i>{% for key in report.report_keyword_set.all %}
@@ -38,17 +69,50 @@
 	<br>
 	{% if editable %}
 	<p>
-	<form id="add_user" action="/report/{{user_name}}/{{report.id}}/" method="post">{% csrf_token %}
-	Give a user permission to see this report: <input name="user_permission" type="text"><input type="submit" value="Add">
+	<form id="add_user" action="/report/{{owner_name}}/{{report.id}}/" method="post">{% csrf_token %}
+	<select id="option" name="action" onchange="showForm()"><option name="add">Add</option><option name="remove">Remove</option></select>
+    a 
+    <select id="entity" name="entity" onchange="showForm()"><option name="user">user</option><option name="group">group</option></select>
+    <span id="add"> to this report: <input name="user_permission" type="text"></span>
+    <span id="remove" hidden='true'> from this report: 
+    <span id="user_remove">
+    <select id="user_removed" name="user_removed" onchange="showForm()">
+        {% for user in user_permissions %}
+        <option name="{{user.id}}">{{user.username}}</option>
+        {% endfor %}
+    </select>
+    </span>
+    <span>
+    <select id="group_removed" name="group_removed" onchange="showForm()" hidden="true">
+        {% for group in group_permissions %}
+        <option name="{{group.id}}">{{group.name}}</option>
+        {% endfor %}
+    </select>
+    </span>
+    </span>
+    <input id="sub" type="submit" value="Add">
 	</form>
-	</p>
+    
 	{% endif %}
 	{% endif %}
+    {% if editable %}
+	<br>
+    <br>
+    <a href="{{report.id}}/edit/">Edit this report</a>
+    {% endif %}
 	</p>
+    </p>
 	
 {% empty %}
 	No report with this ID exists.
 {% endfor %}
 
-
+	<br>
+	<a href="/upload/report">Upload a report</a>
+    <br>
+    <a href="/upload/search">Search for a report</a>
+	<br>
+	<a href="/accounts/{{ user_name|default:'Anonymous' }}/reports">My reports</a>
+	<br>
+	<a href="/accounts/logout">Log out</a>
 </body>

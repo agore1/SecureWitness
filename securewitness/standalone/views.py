@@ -127,7 +127,7 @@ def download_report_file(request,username=None,report_id=None,fileN=0):
     if not can_access(username, repId, uId):
         return HttpResponse("Sorry, you don't have permission to download this.")
     
-    fField = Report.objects.get(id=repId).report_file_set.all()[0].file
+    fField = Report.objects.get(id=repId).report_file_set.all()[fileNum].file
     filePath = fField.name
     fileName = os.path.basename(filePath)
     chunk_size = 8192
